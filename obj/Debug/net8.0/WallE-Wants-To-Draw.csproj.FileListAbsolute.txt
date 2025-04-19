@@ -1,0 +1,15 @@
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\bin\Debug\net8.0\WallE-Wants-To-Draw.exe
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\bin\Debug\net8.0\WallE-Wants-To-Draw.deps.json
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\bin\Debug\net8.0\WallE-Wants-To-Draw.runtimeconfig.json
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\bin\Debug\net8.0\WallE-Wants-To-Draw.dll
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\bin\Debug\net8.0\WallE-Wants-To-Draw.pdb
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\obj\Debug\net8.0\WallE-Wants-To-Draw.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\obj\Debug\net8.0\WallE-Wants-To-Draw.AssemblyInfoInputs.cache
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\obj\Debug\net8.0\WallE-Wants-To-Draw.AssemblyInfo.cs
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\obj\Debug\net8.0\WallE-Wants-To-Draw.csproj.CoreCompileInputs.cache
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\obj\Debug\net8.0\WallE-Wants-To-Draw.dll
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\obj\Debug\net8.0\refint\WallE-Wants-To-Draw.dll
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\obj\Debug\net8.0\WallE-Wants-To-Draw.pdb
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\obj\Debug\net8.0\WallE-Wants-To-Draw.genruntimeconfig.cache
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\obj\Debug\net8.0\ref\WallE-Wants-To-Draw.dll
+C:\Users\Adrian\Documents\GitHub\WallE-Wants-To-Draw\obj\Debug\net8.0\WallE-Wants-To-Draw.sourcelink.json
