@@ -41,6 +41,7 @@
         {"and", TokenType.And},
         {"or", TokenType.Or},
         {"==", TokenType.Equals},
+        {"!=", TokenType.Different},
         {">=", TokenType.MajorEqual},
         {"<=", TokenType.MinorEqual},
         {">", TokenType.Major},
@@ -84,7 +85,7 @@ public enum TokenType{
 
     And, Or,
 
-    Equals, MajorEqual, MinorEqual, Minor, Major,
+    Equals, Different, MajorEqual, MinorEqual, Minor, Major,
 
     label,
 

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WallE-Wants-To-Draw")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+446787015d1c96ba4139eded96200304278c14f6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cd6a0b3190e5e0f2c392c6dbe9f9bfaa081ba24b")]
 [assembly: System.Reflection.AssemblyProductAttribute("WallE-Wants-To-Draw")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WallE-Wants-To-Draw")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

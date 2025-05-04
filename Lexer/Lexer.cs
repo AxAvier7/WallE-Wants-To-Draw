@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.RegularExpressions;
 
 public class Lexer
@@ -56,7 +55,7 @@ public class Lexer
             }                
             if(!matched)
             {
-                LexerErrors?.Add(new LexErrors($"Caracter invalido {input[position]}", line, column));
+                LexerErrors?.Add(new LexErrors($"Caracter invalido \"{input[position]}\"", line, column));
                 AdvancePosition();
             }
         }
@@ -86,11 +85,12 @@ public class Lexer
         if(position + 1 < input.Length && current == '/' && input[position+1] == '/')
         {
             LexerErrors!.Add(new LexErrors($"Commentaries Not Allowed", line, column));
+            line++;
             return true;
         }
         return false;
     }
-    
+
     private void AdvancePosition(){
         if(position < input.Length && input[position] == '\n')
         {
