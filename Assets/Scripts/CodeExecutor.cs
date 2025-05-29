@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +8,9 @@ public class CodeExecutor : MonoBehaviour
 {
     [SerializeField] private InputField codeEditor;
     [SerializeField] private GridManager gridManager;
+    [SerializeField] private InputField fileNameInput;
+
+    private string projectPath;
 
     private Wall_E WallE;
     private Dictionary<string, UnityEngine.Color> colorMap = new Dictionary<string, UnityEngine.Color>()
@@ -23,6 +25,16 @@ public class CodeExecutor : MonoBehaviour
         {"Purple", new UnityEngine.Color(0.5f, 0f, 0.5f)},
         {"Transparent", new UnityEngine.Color(0, 0, 0, 0)}
     };
+
+
+    void Start()
+    {
+        projectPath = Application.dataPath + "/SavedCodes/";
+        if(!Directory.Exists(projectPath))
+        {
+            Directory.CreateDirectory(projectPath);
+        }
+    }
 
     public void ExecuteCode()
     {
@@ -39,19 +51,37 @@ public class CodeExecutor : MonoBehaviour
         }
     }
 
-    public void LoadCode()
-    {
-        string path = UnityEngine.Application.persistentDataPath + "/saved_code.pw";
-        if (File.Exists(path))
-        {
-            string code = File.ReadAllText(path);
-            codeEditor.text = code;
-        }
-    }
-    
     public void SaveCode()
     {
-        string path = UnityEngine.Application.persistentDataPath + "/saved_code.pw";
-        File.WriteAllText(path, codeEditor.text);
+        string fileName = fileNameInput.text;
+        if (string.IsNullOrEmpty(fileName))
+        {
+            Debug.LogError("Nombre de archivo vacío");
+            return;
+        }
+        string fullPath = projectPath + fileName + ".pw";
+        File.WriteAllText(fullPath, codeEditor.text);
+        Debug.Log($"Archivo guardado en: {fullPath}");
     }
+
+    public void LoadCode()
+    {
+        string fileName = fileNameInput.text;
+        if (string.IsNullOrEmpty(fileName))
+        {
+            Debug.LogError("Nombre de archivo vacío");
+            return;
+        }
+        string fullPath = projectPath + fileName + ".pw";
+        if (File.Exists(fullPath))
+        {
+            codeEditor.text = File.ReadAllText(fullPath);
+            Debug.Log($"Archivo cargado desde: {fullPath}");
+        }
+        else
+        {
+            Debug.LogError($"Archivo no encontrado: {fullPath}");
+        }
+    }
+
 }
