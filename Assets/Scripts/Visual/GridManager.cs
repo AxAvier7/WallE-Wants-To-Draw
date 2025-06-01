@@ -9,7 +9,7 @@ public class GridManager : MonoBehaviour
     [SerializeField] private InputField heightInput;
 
     private Pixel[,] pixels;
-    private int width, height = 100;
+    public int width, height = 100;
 
     void Start() => InitializeGrid(width, height);
 
@@ -35,7 +35,7 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    public void SetPixelColor(int x, int y, Color color)
+    public void SetPixelColor(int x, int y, UnityEngine.Color color)
     {
         if (x >= 0 && x < width && y >= 0 && y > height)
             pixels[x, y].SetColor(color);

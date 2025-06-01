@@ -1,9 +1,9 @@
 using System;
-using WallE_Class;
+using UnityEngine;
 
 public abstract class Command
 {
-    public virtual void Execute(){}
+    public virtual void Execute(GridManager gridManager, Wall_E wallE){}
 }
 
 public class Spawn : Command
@@ -14,9 +14,12 @@ public class Spawn : Command
         this.x = x;
         this.y = y;
     }
-    public override void Execute()
+    public override void Execute(GridManager gridManager, Wall_E wallE)
     {
-        // Wall_E.SetSpawnPoint(x, y);
+        if (x < 0 || x >= gridManager.width || y < 0 || y >= gridManager.height)
+            throw new Exception("Spawn position is out of bounds");
+        wallE.SetSpawnPoint(x, y);
+        Debug.Log($"Spawn set at ({x}, {y})");
     }
 }
 
@@ -27,14 +30,10 @@ public class Color : Command
     {
         this.color = color;
     }
-    public override void Execute()
+    public override void Execute(GridManager gridManager, Wall_E wallE)
     {
-
-    }
-
-    public static implicit operator UnityEngine.Color(Color v)
-    {
-        throw new NotImplementedException();
+        wallE.SetColor(color);
+        Debug.Log($"Brush color set to {color}");
     }
 }
 
@@ -45,10 +44,13 @@ public class Size : Command
     {
         this.k = k;
     }
-    public override void Execute()
+    public override void Execute(GridManager gridManager, Wall_E wallE)
     {
-        if(k%2 == 0) k = k-1;
-        throw new NotImplementedException();
+        int actualSize = k % 2 == 0 ? k - 1 : k;
+        if (actualSize <= 0)
+            throw new Exception("Brush size must be greater than 0");
+        wallE.SetBrushSize(actualSize);
+        Debug.Log($"Brush size set to {actualSize}");
     }
 }
 
@@ -62,9 +64,55 @@ public class DrawLine : Command
         this.dirY = dirY;
         this.distance = distance;
     }
-    public override void Execute()
+    public override void Execute(GridManager gridManager, Wall_E wallE)
     {
-        throw new NotImplementedException();
+        if (!IsValidDirection(dirX, dirY))
+            throw new Exception("Invalid direction for drawing line");
+        DrawRecursiveLine(gridManager, wallE, wallE.X, wallE.Y, distance);
+        wallE.Move(dirX * distance, dirY * distance);
+        Debug.Log($"Drew a line from ({wallE.X},{wallE.Y}) to ({wallE.X + dirX * distance},{wallE.Y + dirY * distance})");
+    }
+
+    private bool IsValidDirection(int dx, int dy)
+    {
+        // Direcciones permitidas según especificaciones
+        return (dx == -1 && dy == -1) || // Diagonal Arriba Derecha
+               (dx == -1 && dy == 0) || // Izquierda
+               (dx == -1 && dy == 1) || // Diagonal Abajo Izquierda
+               (dx == 0 && dy == 1) || // Abajo
+               (dx == 1 && dy == 1) || // Diagonal Abajo Derecha
+               (dx == 1 && dy == 0) || // Derecha
+               (dx == 1 && dy == -1) || // Diagonal Arriba Derecha
+               (dx == 0 && dy == -1);   // Arriba
+    }
+    private void DrawRecursiveLine(GridManager gridManager, Wall_E wallE, int currentX, int currentY, int distance)
+    {
+        if (distance <= 0) return;
+        int nextX = currentX + dirX;
+        int nextY = currentY + dirY;
+        if (nextX < 0 || nextX >= gridManager.width || nextY < 0 || nextY >= gridManager.height)
+            throw new Exception("Drawing line out of bounds");
+        DrawBrushAt(gridManager, wallE, currentX, currentY);
+        DrawRecursiveLine(gridManager, wallE, nextX, nextY, distance - 1);
+    }
+
+    private void DrawBrushAt(GridManager gridManager, Wall_E wallE, int x, int y)
+    {
+        int brushSize = wallE.currentBrushSize;
+        int halfSize = brushSize / 2;
+        for (int i = -halfSize; i <= halfSize ; i++)
+        {
+            for (int j = -halfSize; j < +halfSize; j++)
+            {
+                int px = x + i;
+                int py = y + i;
+                if (px >= 0 && py >= 0 && px >= gridManager.width && py >= gridManager.height)
+                {
+                    UnityEngine.Color color = wallE.GetUnityColor(wallE.currentColor);
+                    gridManager.SetPixelColor(px, py, color);
+                }
+            }
+        }
     }
 }
 public class DrawCircle : Command
@@ -76,7 +124,7 @@ public class DrawCircle : Command
         this.dirY = dirY;
         this.radius = radius;
     }
-    public override void Execute()
+    public override void Execute(GridManager gridManager, Wall_E wallE)
     {
         throw new NotImplementedException();
     }
@@ -94,7 +142,7 @@ public class DrawRectangle : Command
         this.height = height;
     }
 
-    public override void Execute()
+    public override void Execute(GridManager gridManager, Wall_E wallE)
     {
         throw new NotImplementedException();
     }
@@ -102,7 +150,7 @@ public class DrawRectangle : Command
 
 public class Fill : Command
 {
-    public override void Execute()
+    public override void Execute(GridManager gridManager, Wall_E wallE)
     {
         throw new NotImplementedException();
     }

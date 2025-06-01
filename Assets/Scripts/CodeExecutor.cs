@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,21 +10,6 @@ public class CodeExecutor : MonoBehaviour
     [SerializeField] private InputField fileNameInput;
 
     private string projectPath;
-
-    private Wall_E WallE;
-    private Dictionary<string, UnityEngine.Color> colorMap = new Dictionary<string, UnityEngine.Color>()
-    {
-        {"Red", UnityEngine.Color.red},
-        {"Green", UnityEngine.Color.green},
-        {"Blue", UnityEngine.Color.blue},
-        {"Yellow", UnityEngine.Color.yellow},
-        {"Black", UnityEngine.Color.black},
-        {"White", UnityEngine.Color.white},
-        {"Orange", new UnityEngine.Color(1f, 0.65f, 0f)},
-        {"Purple", new UnityEngine.Color(0.5f, 0f, 0.5f)},
-        {"Transparent", new UnityEngine.Color(0, 0, 0, 0)}
-    };
-
 
     void Start()
     {

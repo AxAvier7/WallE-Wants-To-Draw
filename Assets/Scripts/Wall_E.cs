@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Debug = UnityEngine.Debug;
 
 public class Wall_E
 {
@@ -7,6 +8,20 @@ public class Wall_E
     public int Y { get; private set; }
     public string currentColor { get; private set; }
     public int currentBrushSize { get; private set; }
+
+    private Dictionary<string, UnityEngine.Color> colorMap = new Dictionary<string, UnityEngine.Color>()
+    {
+        {"Red", UnityEngine.Color.red},
+        {"Green", UnityEngine.Color.green},
+        {"Blue", UnityEngine.Color.blue},
+        {"Yellow", UnityEngine.Color.yellow},
+        {"Black", UnityEngine.Color.black},
+        {"White", UnityEngine.Color.white},
+        {"Orange", new UnityEngine.Color(1f, 0.65f, 0f)},
+        {"Purple", new UnityEngine.Color(0.5f, 0f, 0.5f)},
+        {"Transparent", new UnityEngine.Color(0, 0, 0, 0)}
+    };
+
     public Wall_E()
     {
         currentColor = "Transparent";
@@ -23,7 +38,7 @@ public class Wall_E
             throw new ArgumentException("Invalid color");
         currentColor = color;
     }
-    
+
     public void SetBrushSize(int size)
     {
         if (size <= 0)
@@ -44,5 +59,21 @@ public class Wall_E
             return true;
         }
         return false;
+    }
+
+    public int GetActualX() => X;
+    public int GetActualY() => Y;
+
+    public UnityEngine.Color GetUnityColor(string colorName)
+    {
+        if (string.IsNullOrEmpty(colorName))
+        {
+            Debug.LogWarning("Color name is null or empty. Returning transparent");
+            return colorMap["Transparent"];
+        }
+        if (colorMap.ContainsKey(colorName))
+            return colorMap[colorName];
+        Debug.LogWarning("Unknown color. Returning transparent");
+        return colorMap["Transparent"];
     }
 }
