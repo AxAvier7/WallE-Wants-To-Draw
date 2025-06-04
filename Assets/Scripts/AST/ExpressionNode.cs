@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-
 public abstract class ExpressionNode : ASTNode
 {
-    
+    public abstract int Evaluate(Wall_E wall_E, GridManager gridManager, VariableManager variables);
 }
 
 public class NumberNode : ExpressionNode
@@ -10,46 +9,36 @@ public class NumberNode : ExpressionNode
     public int Value;
     public NumberNode(int value)
     {
-        Value=value;
+        Value = value;
     }
 
     public override void Accept(IVisitor visitor) => visitor.Visit(this);
+
+    public override int Evaluate(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    {
+        return Value;
+    }
+
     public override string ToString()
     {
         return Value.ToString();
     }
 }
 
-public class FunctionCallNode : ExpressionNode
-{
-    public string FunctionName { get; }
-    public List<ExpressionNode> Arguments { get; }
-    public FunctionCallNode(string name, List<ExpressionNode> args)
-    {
-        FunctionName = name;
-        Arguments = args;
-    }
-    public override void Accept(IVisitor visitor) => visitor.Visit(this);
-}
 
-public class StringNode : ExpressionNode
-{
-    public string Value;
-    public StringNode(string value)
-    {
-        Value=value;
-    }
-    public override void Accept(IVisitor visitor) => visitor.Visit(this);
-}
 
 public class VariableNode : ExpressionNode
 {
-    public string Name, Value;
-    public VariableNode(string name, string value)
+    public string Name { get; }
+    public VariableNode(string name)
     {
         Name=name;
-        Value=value;
     }
     public override void Accept(IVisitor visitor) => visitor.Visit(this);
+
+    public override int Evaluate(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    {
+        return variables.GetVariable(Name);
+    }
 }
 
