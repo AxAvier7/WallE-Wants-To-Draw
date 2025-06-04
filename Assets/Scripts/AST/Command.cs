@@ -16,7 +16,7 @@ public class Spawn : Command
     }
     public override void Execute(GridManager gridManager, Wall_E wallE)
     {
-        if (x < 0 || x >= gridManager.width || y < 0 || y >= gridManager.height)
+        if (x < 0 || x >= gridManager.Width || y < 0 || y >= gridManager.Height)
             throw new Exception("Spawn position is out of bounds");
         wallE.SetSpawnPoint(x, y);
         Debug.Log($"Spawn set at ({x}, {y})");
@@ -90,7 +90,7 @@ public class DrawLine : Command
         if (distance <= 0) return;
         int nextX = currentX + dirX;
         int nextY = currentY + dirY;
-        if (nextX < 0 || nextX >= gridManager.width || nextY < 0 || nextY >= gridManager.height)
+        if (nextX < 0 || nextX >= gridManager.Width || nextY < 0 || nextY >= gridManager.Height)
             throw new Exception("Drawing line out of bounds");
         DrawBrushAt(gridManager, wallE, currentX, currentY);
         DrawRecursiveLine(gridManager, wallE, nextX, nextY, distance - 1);
@@ -106,9 +106,9 @@ public class DrawLine : Command
             {
                 int px = x + i;
                 int py = y + i;
-                if (px >= 0 && py >= 0 && px >= gridManager.width && py >= gridManager.height)
+                if (px >= 0 && py >= 0 && px >= gridManager.Width && py >= gridManager.Height)
                 {
-                    UnityEngine.Color color = wallE.GetUnityColor(wallE.currentColor);
+                    UnityEngine.Color color = ColorManager.GetUnityColor(wallE.currentColor);
                     gridManager.SetPixelColor(px, py, color);
                 }
             }
