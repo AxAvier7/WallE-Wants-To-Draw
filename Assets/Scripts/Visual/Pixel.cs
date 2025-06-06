@@ -6,7 +6,16 @@ public class Pixel : MonoBehaviour
     public int X { get; private set; }
     public int Y { get; private set; }
     private Image image;
-    void Awake() => image = GetComponent<Image>();
+    private AspectRatioFitter aspectRatioFitter;
+
+    void Awake()
+    {
+        image = GetComponent<Image>();
+        aspectRatioFitter = GetComponent<AspectRatioFitter>();
+        aspectRatioFitter.aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
+        aspectRatioFitter.aspectRatio = 1;
+    }
+
     public void Initialize(int x, int y)
     {
         X = x; Y = y;

@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
+
 public abstract class ExpressionNode : ASTNode
 {
     public abstract int Evaluate(Wall_E wall_E, GridManager gridManager, VariableManager variables);
-
-    internal int Evaluate()
-    {
-        throw new NotImplementedException();
-    }
 }
 
 public class NumberNode : ExpressionNode
@@ -24,14 +20,48 @@ public class NumberNode : ExpressionNode
     {
         return Value;
     }
-
-    public override string ToString()
-    {
-        return Value.ToString();
-    }
 }
 
+public class FunctionCallNode : ExpressionNode
+{
+    public string FunctionName { get; }
+    public List<ExpressionNode> Arguments { get; }
+    public FunctionCallNode(string name, List<ExpressionNode> args)
+    {
+        FunctionName = name;
+        Arguments = args;
+    }
+    public override void Accept(IVisitor visitor) => visitor.Visit(this);
 
+    public override int Evaluate(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    {
+        List<int> evaluatedArgs = new List<int>();
+        foreach (var arg in Arguments)
+        {
+            evaluatedArgs.Add(arg.Evaluate(wall_E, gridManager, variables));
+        }
+
+        switch (FunctionName)
+        {
+            case "GetActualX":
+                return wall_E.GetActualX();
+            case "GetActualY":
+                return wall_E.GetActualY();
+            case "GetCanvasSize":
+                return gridManager.Width;
+            // case "GetColorCount":
+            //     return new GetColorCount(evaluatedArgs[0], evaluatedArgs[1], evaluatedArgs[2], evaluatedArgs[3], evaluatedArgs[4]).Execute(wall_E, gridManager);
+            // case "IsBrushColor":
+            //     return new IsBrushColor(evaluatedArgs[0]).Execute(wall_E, gridManager);
+            case "IsBrushSize":
+                return new IsBrushSize(evaluatedArgs[0]).Execute(wall_E, gridManager);
+            // case "IsCanvasColor":
+            //     return new IsCanvasColor(evaluatedArgs[0], evaluatedArgs[1], evaluatedArgs[2], evaluatedArgs[3], evaluatedArgs[4]).Execute(wall_E, gridManager);
+            default:
+                throw new System.Exception($"Unknown function: {FunctionName}");
+        }
+    }
+}
 
 public class VariableNode : ExpressionNode
 {

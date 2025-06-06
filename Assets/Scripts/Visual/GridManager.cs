@@ -6,13 +6,17 @@ public class GridManager : MonoBehaviour
     [SerializeField] private GridLayoutGroup gridLayout;
     [SerializeField] private GameObject pixelPrefab;
     [SerializeField] private InputField widthInput;
-    [SerializeField] private InputField heightInput;
+
     private Pixel[,] pixels;
     private string[,] colorNames;
     public int Width { get; private set; }
     public int Height { get; private set; }
 
-    void Start() => InitializeGrid(Width, Height);
+    void Start()
+    {
+        InitializeGrid(10, 10);
+        GetComponent<GridResizer>().ResizeGrid();
+    }
 
     private void InitializeGrid(int newWidth, int newHeight)
     {
@@ -23,6 +27,7 @@ public class GridManager : MonoBehaviour
         Height = newHeight;
         gridLayout.constraintCount = Width;
         pixels = new Pixel[Width, Height];
+        colorNames = new string[Width, Height];
 
         for (int x = 0; x < Width; x++)
         {
@@ -39,7 +44,7 @@ public class GridManager : MonoBehaviour
 
     public void SetPixelColor(int x, int y, UnityEngine.Color color)
     {
-        if (x >= 0 && x < Width && y >= 0 && y > Height)
+        if (x >= 0 && x < Width && y >= 0 && y < Height)
             pixels[x, y].SetColor(color);
     }
 
@@ -65,8 +70,8 @@ public class GridManager : MonoBehaviour
     public void OnResizeClicked()
     {
         int newWidth = int.Parse(widthInput.text);
-        int newHeight = int.Parse(heightInput.text);
-        InitializeGrid(newWidth, newHeight);
+        InitializeGrid(newWidth, newWidth);
+        GetComponent<GridResizer>().ResizeGrid();
     }
 
     public void ClearGrid()
