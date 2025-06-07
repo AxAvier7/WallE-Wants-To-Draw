@@ -3,10 +3,26 @@ using UnityEngine;
 
 public abstract class Command
 {
-    public virtual void Execute(GridManager gridManager, Wall_E wallE){}
+    public virtual void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables) { }
 }
 
-public class Spawn : Command
+public class AssignmentCommand : Command
+{
+    private string variableName;
+    private Expression expression;
+    public AssignmentCommand(string variableName, Expression expression)
+    {
+        this.variableName = variableName;
+        this.expression = expression;
+    }
+    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
+    {
+        int value = expression.Execute(wallE, gridManager, variables);
+        variables.SetVariable(variableName, value);
+    }
+}
+
+public class Spawn : Command //Posiciona al Wall-E en las coordenadas (x, y) del grid
 {
     int x, y;
     public Spawn(int x, int y)
@@ -14,7 +30,7 @@ public class Spawn : Command
         this.x = x;
         this.y = y;
     }
-    public override void Execute(GridManager gridManager, Wall_E wallE)
+    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
     {
         if (x < 0 || x >= gridManager.Width || y < 0 || y >= gridManager.Height)
             throw new Exception("Spawn position is out of bounds");
@@ -23,28 +39,28 @@ public class Spawn : Command
     }
 }
 
-public class Color : Command
+public class Color : Command //Cambia el color del pinc
 {
     string color;
     public Color(string color)
     {
         this.color = color;
     }
-    public override void Execute(GridManager gridManager, Wall_E wallE)
+    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
     {
         wallE.SetColor(color);
         Debug.Log($"Brush color set to {color}");
     }
 }
 
-public class Size : Command
+public class Size : Command //Modifica el tamaño del pincel
 {
     int k;
     public Size(int k)
     {
         this.k = k;
     }
-    public override void Execute(GridManager gridManager, Wall_E wallE)
+    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
     {
         int actualSize = k % 2 == 0 ? k - 1 : k;
         if (actualSize <= 0)
@@ -54,7 +70,7 @@ public class Size : Command
     }
 }
 
-public class DrawLine : Command
+public class DrawLine : Command //Dibuja una linea desde la posicion de WallE y termina en la distancia "distance" en la direccion indicada
 {
     int dirX, dirY, distance;
 
@@ -64,7 +80,7 @@ public class DrawLine : Command
         this.dirY = dirY;
         this.distance = distance;
     }
-    public override void Execute(GridManager gridManager, Wall_E wallE)
+    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
     {
         if (!IsValidDirection(dirX, dirY))
             throw new Exception("Invalid direction for drawing line");
@@ -115,7 +131,7 @@ public class DrawLine : Command
         }
     }
 }
-public class DrawCircle : Command
+public class DrawCircle : Command  //Dibuja un circulo con centro en la posicion de WallE y con radio "radius"
 {
     int dirX, dirY, radius;
     public DrawCircle(int dirX, int dirY, int radius)
@@ -124,13 +140,13 @@ public class DrawCircle : Command
         this.dirY = dirY;
         this.radius = radius;
     }
-    public override void Execute(GridManager gridManager, Wall_E wallE)
+    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
     {
         throw new NotImplementedException();
     }
 }
 
-public class DrawRectangle : Command
+public class DrawRectangle : Command // Dibuja un rectangulo con esquina superior izquierda en la posicion de WallE y con ancho "width" y alto "height"
 {
     int dirX, dirY, distance, width, height;
     public DrawRectangle(int dirX, int dirY, int distance, int width, int height)
@@ -142,15 +158,15 @@ public class DrawRectangle : Command
         this.height = height;
     }
 
-    public override void Execute(GridManager gridManager, Wall_E wallE)
+    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
     {
         throw new NotImplementedException();
     }
 }
 
-public class Fill : Command
+public class Fill : Command //Pinta con el color actual todos los pixeles del mismo color que la posicion de WallE contiguos a este
 {
-    public override void Execute(GridManager gridManager, Wall_E wallE)
+    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
     {
         throw new NotImplementedException();
     }

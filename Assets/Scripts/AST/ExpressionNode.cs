@@ -54,7 +54,7 @@ public class FunctionCallNode : ExpressionNode
             // case "IsBrushColor":
             //     return new IsBrushColor(evaluatedArgs[0]).Execute(wall_E, gridManager);
             case "IsBrushSize":
-                return new IsBrushSize(evaluatedArgs[0]).Execute(wall_E, gridManager);
+                return new IsBrushSize(evaluatedArgs[0]).Execute(wall_E, gridManager, variables);
             // case "IsCanvasColor":
             //     return new IsCanvasColor(evaluatedArgs[0], evaluatedArgs[1], evaluatedArgs[2], evaluatedArgs[3], evaluatedArgs[4]).Execute(wall_E, gridManager);
             default:

@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,11 +8,13 @@ public class CodeExecutor : MonoBehaviour
     [SerializeField] private InputField codeEditor;
     [SerializeField] private GridManager gridManager;
     [SerializeField] private InputField fileNameInput;
+    [SerializeField] private Button executeButton;
 
     private string projectPath;
 
     void Start()
     {
+        executeButton.onClick.AddListener(ExecuteCode);
         projectPath = Application.dataPath + "/SavedCodes/";
         if(!Directory.Exists(projectPath))
         {
@@ -28,10 +30,35 @@ public class CodeExecutor : MonoBehaviour
 
     private void ProcessCode(string code)
     {
-        string[] lines = code.Split('\n');
-        foreach (var line in lines)
+        var lexer = new Lexer(code);
+        var tokens = lexer.Tokenize(code);
+        if (lexer.LexerErrors.Count > 0)
         {
-            throw new NotImplementedException("Code execution is not implemented yet.");
+            foreach (var error in lexer.LexerErrors)
+            {
+                Debug.LogError($"Lexical Error: {error}");
+            }
+            return;
+        }
+        foreach (var token in tokens)
+        {
+            Debug.Log($"Token: {token.Type} - {token.Value} at {token.Line}:{token.Column}");
+        }
+
+        var parser = new Parser();
+        List<Command> commands = parser.Parse(tokens);
+
+        ExecuteCommands(commands);
+    }
+
+    private void ExecuteCommands(List<Command> commands)
+    {
+        Wall_E wallE = new Wall_E();
+        VariableManager variableManager = new VariableManager();
+
+        foreach (var cmd in commands)
+        {
+            cmd.Execute(gridManager, wallE, variableManager);
         }
     }
 

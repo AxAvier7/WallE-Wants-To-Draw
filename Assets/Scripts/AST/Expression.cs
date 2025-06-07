@@ -2,15 +2,46 @@ using UnityEngine;
 
 public abstract class Expression
 {
-    public virtual int Execute(Wall_E wall_E, GridManager gridManager)
+    public virtual int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
     {
         return int.MaxValue;
     }
 }
 
+public class NumberLiteral : Expression
+{
+    private int value;
+
+    public NumberLiteral(int value)
+    {
+        this.value = value;
+    }
+
+    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    {
+        return value;
+    }
+}
+
+public class StringLiteral : Expression
+{
+    private string value;
+
+    public StringLiteral(string value)
+    {
+        this.value = value;
+    }
+
+    //Este execute devuelve 0 porque no es necesario que los strings se ejecuten
+    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    {
+        return 0;
+    }
+}
+
 public class GetActualX : Expression
 {
-    public override int Execute(Wall_E wall_E, GridManager gridManager)
+    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
     {
         return wall_E.GetActualX();
     }
@@ -18,7 +49,7 @@ public class GetActualX : Expression
 
 public class GetActualY : Expression
 {
-    public override int Execute(Wall_E wall_E, GridManager gridManager)
+    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
     {
         return wall_E.GetActualY();
     }
@@ -26,7 +57,7 @@ public class GetActualY : Expression
 
 public class GetCanvasSize : Expression
 {
-    public override int Execute(Wall_E wall_E, GridManager gridManager)
+    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
     {
         return gridManager.Width;
     }
@@ -45,7 +76,7 @@ public class GetColorCount : Expression
         this.x2 = x2;
         this.y2 = y2;
     }
-    public override int Execute(Wall_E wall_E, GridManager gridManager)
+    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
     {
         int minX = Mathf.Min(x1, x2);
         int maxX = Mathf.Min(x1, x2);
@@ -78,7 +109,7 @@ public class IsBrushColor : Expression
     {
         this.color = color;
     }
-    public override int Execute(Wall_E wall_E, GridManager gridManager)
+    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
     {
         return wall_E.currentColor == color? 1 : 0;
     }
@@ -91,7 +122,7 @@ public class IsBrushSize : Expression
     {
         this.size = size;
     }
-    public override int Execute(Wall_E wall_E, GridManager gridManager)
+    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
     {
         return wall_E.currentBrushSize == size ? 1 : 0;
     }
@@ -107,7 +138,7 @@ public class IsCanvasColor : Expression
         this.vertical = vertical;
         this.horizontal = horizontal;
     }
-    public override int Execute(Wall_E wall_E, GridManager gridManager)
+    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
     {
         int checkX = wall_E.X + horizontal;
         int checkY = wall_E.Y + vertical;
