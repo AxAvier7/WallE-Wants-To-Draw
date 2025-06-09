@@ -46,19 +46,44 @@ public class CodeExecutor : MonoBehaviour
         }
 
         var parser = new Parser();
-        List<Command> commands = parser.Parse(tokens);
+        List<ASTNode> nodes = parser.Parse(tokens);
 
-        ExecuteCommands(commands);
+        ExecuteCommands(nodes);
     }
 
-    private void ExecuteCommands(List<Command> commands)
+    private void ExecuteCommands(List<ASTNode> nodes)
     {
-        Wall_E wallE = new Wall_E();
-        VariableManager variableManager = new VariableManager();
-
-        foreach (var cmd in commands)
+        var context = new Context(new Wall_E(), gridManager, new VariableManager());
+        for (int i = 0; i < nodes.Count; i++)
         {
-            cmd.Execute(gridManager, wallE, variableManager);
+            if (nodes[i] is LabelNode labelNode)
+            {
+                if (context.Labels.ContainsKey(labelNode.LabelName))
+                {
+                    context.SetError(i, $"The label already exists: {labelNode.LabelName}");
+                    return;
+                }
+                context.Labels.Add(labelNode.LabelName, i);
+            }
+        }
+        context.Counter = 0;
+        while (context.Counter < nodes.Count && !context.HasError())
+        {
+            try
+            {
+                nodes[context.Counter].Execute(context);
+                context.Counter++;
+            }
+            catch (System.Exception ex)
+            {
+                context.SetError(context.Counter, ex.Message);
+                Debug.LogError($"Execution Error at line {context.Counter}: {ex.Message}");
+                return;
+            }
+            if (context.HasError())
+            {
+                Debug.LogError($"Error en línea {context.ErrorLine}: {context.ErrorMessage}");
+            }
         }
     }
 

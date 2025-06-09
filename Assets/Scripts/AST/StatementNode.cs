@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public abstract class StatementNode : ASTNode   {}
+public abstract class StatementNode : ASTNode{ }
 
 public class AssignmentNode : StatementNode
 {
@@ -16,6 +16,11 @@ public class AssignmentNode : StatementNode
     }
 
     public override void Accept(IVisitor visitor) => visitor.Visit(this);
+
+    public override void Execute(Context context)
+    {
+        throw new System.NotImplementedException();
+    }
 }
 
 public class CommandNode : StatementNode
@@ -32,6 +37,11 @@ public class CommandNode : StatementNode
     }
 
     public override void Accept(IVisitor visitor) => visitor.Visit(this);
+
+    public override void Execute(Context context)
+    {
+        throw new System.NotImplementedException();
+    }
 }
 
 public class GoToNode : StatementNode
@@ -44,6 +54,15 @@ public class GoToNode : StatementNode
         Condition = condition;
         Line = line;
         Column = column;
+    }
+
+    public override void Execute(Context context)
+    {
+        var condition = Condition.Evaluate(context);
+        if (condition.AsBool())
+        {
+            context.JumpToLabel(Label);
+        }
     }
 
     public override void Accept(IVisitor visitor) => visitor.Visit(this);
@@ -60,9 +79,19 @@ public class LabelNode : StatementNode
     }
 
     public override void Accept(IVisitor visitor) => visitor.Visit(this);
+
+    public override void Execute(Context context)
+    {
+        throw new System.NotImplementedException();
+    }
 }
 
 public class FunctionCallStatement : StatementNode
 {
     public override void Accept(IVisitor visitor) => visitor.Visit(this);
+
+    public override void Execute(Context context)
+    {
+        throw new System.NotImplementedException();
+    }
 }

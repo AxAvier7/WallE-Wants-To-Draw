@@ -70,6 +70,10 @@ public class GridManager : MonoBehaviour
     public void OnResizeClicked()
     {
         int newWidth = int.Parse(widthInput.text);
+        if (newWidth > 256)
+        {
+            Debug.LogError("Exceded the size limit. Maximum: 256");
+        }
         InitializeGrid(newWidth, newWidth);
         GetComponent<GridResizer>().ResizeGrid();
     }

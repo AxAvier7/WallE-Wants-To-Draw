@@ -1,9 +1,9 @@
-using System;
 using System.Collections.Generic;
 
 public abstract class ExpressionNode : ASTNode
 {
-    public abstract int Evaluate(Wall_E wall_E, GridManager gridManager, VariableManager variables);
+    public abstract ExValue Evaluate(Context context);
+    public override void Execute(Context context) => Evaluate(context);
 }
 
 public class NumberNode : ExpressionNode
@@ -16,7 +16,7 @@ public class NumberNode : ExpressionNode
 
     public override void Accept(IVisitor visitor) => visitor.Visit(this);
 
-    public override int Evaluate(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public override ExValue Evaluate(Context context)
     {
         return Value;
     }
@@ -33,28 +33,28 @@ public class FunctionCallNode : ExpressionNode
     }
     public override void Accept(IVisitor visitor) => visitor.Visit(this);
 
-    public override int Evaluate(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public override ExValue Evaluate(Context context)
     {
         List<int> evaluatedArgs = new List<int>();
         foreach (var arg in Arguments)
         {
-            evaluatedArgs.Add(arg.Evaluate(wall_E, gridManager, variables));
+            evaluatedArgs.Add(arg.Evaluate(context).AsInt());
         }
 
         switch (FunctionName)
         {
             case "GetActualX":
-                return wall_E.GetActualX();
+                return context.WallE.GetActualX();
             case "GetActualY":
-                return wall_E.GetActualY();
+                return context.WallE.GetActualY();
             case "GetCanvasSize":
-                return gridManager.Width;
+                return context.GridManager.Width;
             // case "GetColorCount":
             //     return new GetColorCount(evaluatedArgs[0], evaluatedArgs[1], evaluatedArgs[2], evaluatedArgs[3], evaluatedArgs[4]).Execute(wall_E, gridManager);
             // case "IsBrushColor":
             //     return new IsBrushColor(evaluatedArgs[0]).Execute(wall_E, gridManager);
             case "IsBrushSize":
-                return new IsBrushSize(evaluatedArgs[0]).Execute(wall_E, gridManager, variables);
+                return new IsBrushSize(evaluatedArgs[0]).Evaluate(context);
             // case "IsCanvasColor":
             //     return new IsCanvasColor(evaluatedArgs[0], evaluatedArgs[1], evaluatedArgs[2], evaluatedArgs[3], evaluatedArgs[4]).Execute(wall_E, gridManager);
             default:
@@ -72,9 +72,9 @@ public class VariableNode : ExpressionNode
     }
     public override void Accept(IVisitor visitor) => visitor.Visit(this);
 
-    public override int Evaluate(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public override ExValue Evaluate(Context context)
     {
-        return variables.GetVariable(Name);
+        return context.Variables.GetVariable(Name);
     }
 }
 
@@ -85,9 +85,9 @@ public class NegationExpressionNode : ExpressionNode
     {
         Operand = operand;
     }
-    public override int Evaluate(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public override ExValue Evaluate(Context context)
     {
-        int operandValue = Operand.Evaluate(wall_E, gridManager, variables);
+        int operandValue = Operand.Evaluate(context).AsInt();
         return operandValue == 0 ? 1 : 0;
     }
 

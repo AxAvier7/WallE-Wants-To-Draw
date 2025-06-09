@@ -27,10 +27,10 @@ public class ArithmeticBinaryExpressionNode : BinaryExpression
         ValidateOperator(operador);
     }
 
-    public override int Evaluate(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public override ExValue Evaluate(Context context)
     {
-        int leftValue = Left.Evaluate(wall_E, gridManager, variables);
-        int rightValue = Right.Evaluate(wall_E, gridManager, variables);
+        int leftValue = Left.Evaluate(context).AsInt();
+        int rightValue = Right.Evaluate(context).AsInt();
 
         switch (Operator)
         {
@@ -94,10 +94,10 @@ public class BooleanBinaryExpressionNode : BinaryExpression
                operador == TokenType.Minor || operador == TokenType.MinorEqual;
     }
 
-    public override int Evaluate(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public override ExValue Evaluate(Context context)
     {
-        int leftVal = Left.Evaluate(wall_E, gridManager, variables);
-        int rightVal = Right.Evaluate(wall_E, gridManager, variables);
+        int leftVal = Left.Evaluate(context).AsInt();
+        int rightVal = Right.Evaluate(context).AsInt();
 
         switch (Operator)
         {

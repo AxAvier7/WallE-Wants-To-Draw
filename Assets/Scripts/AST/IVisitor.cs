@@ -10,4 +10,5 @@ public interface IVisitor
     void Visit(GoToNode node);
     void Visit(LabelNode node);
     void Visit(NegationExpressionNode node);
+    void Visit(Command node);
 }

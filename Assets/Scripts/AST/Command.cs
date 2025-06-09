@@ -1,9 +1,10 @@
 using System;
 using UnityEngine;
 
-public abstract class Command
+public abstract class Command : StatementNode // Clase base para todos los comandos que Wall-E puede ejecutar
 {
-    public virtual void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables) { }
+    public override void Accept(IVisitor visitor) => visitor.Visit(this);
+    
 }
 
 public class AssignmentCommand : Command
@@ -15,10 +16,13 @@ public class AssignmentCommand : Command
         this.variableName = variableName;
         this.expression = expression;
     }
-    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
+
+
+
+    public override void Execute(Context context)
     {
-        int value = expression.Execute(wallE, gridManager, variables);
-        variables.SetVariable(variableName, value);
+        int value = expression.Evaluate(context).AsInt();
+        context.Variables.SetVariable(variableName, value);
     }
 }
 
@@ -30,11 +34,11 @@ public class Spawn : Command //Posiciona al Wall-E en las coordenadas (x, y) del
         this.x = x;
         this.y = y;
     }
-    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
+    public override void Execute(Context context)
     {
-        if (x < 0 || x >= gridManager.Width || y < 0 || y >= gridManager.Height)
+        if (x < 0 || x >= context.GridManager.Width || y < 0 || y >= context.GridManager.Height)
             throw new Exception("Spawn position is out of bounds");
-        wallE.SetSpawnPoint(x, y);
+        context.WallE.SetSpawnPoint(x, y);
         Debug.Log($"Spawn set at ({x}, {y})");
     }
 }
@@ -46,9 +50,9 @@ public class Color : Command //Cambia el color del pinc
     {
         this.color = color;
     }
-    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
+    public override void Execute(Context context)
     {
-        wallE.SetColor(color);
+        context.WallE.SetColor(color);
         Debug.Log($"Brush color set to {color}");
     }
 }
@@ -60,12 +64,12 @@ public class Size : Command //Modifica el tamaño del pincel
     {
         this.k = k;
     }
-    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
+    public override void Execute(Context context)
     {
         int actualSize = k % 2 == 0 ? k - 1 : k;
         if (actualSize <= 0)
             throw new Exception("Brush size must be greater than 0");
-        wallE.SetBrushSize(actualSize);
+        context.WallE.SetBrushSize(actualSize);
         Debug.Log($"Brush size set to {actualSize}");
     }
 }
@@ -80,18 +84,17 @@ public class DrawLine : Command //Dibuja una linea desde la posicion de WallE y 
         this.dirY = dirY;
         this.distance = distance;
     }
-    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
+    public override void Execute(Context context)
     {
         if (!IsValidDirection(dirX, dirY))
             throw new Exception("Invalid direction for drawing line");
-        DrawRecursiveLine(gridManager, wallE, wallE.X, wallE.Y, distance);
-        wallE.Move(dirX * distance, dirY * distance);
-        Debug.Log($"Drew a line from ({wallE.X},{wallE.Y}) to ({wallE.X + dirX * distance},{wallE.Y + dirY * distance})");
+        DrawRecursiveLine(context.GridManager, context.WallE, context.WallE.X, context.WallE.Y, distance);
+        context.WallE.Move(dirX * distance, dirY * distance);
+        Debug.Log($"Drew a line from ({context.WallE.X},{context.WallE.Y}) to ({context.WallE.X + dirX * distance},{context.WallE.Y + dirY * distance})");
     }
 
     private bool IsValidDirection(int dx, int dy)
     {
-        // Direcciones permitidas según especificaciones
         return (dx == -1 && dy == -1) || // Diagonal Arriba Derecha
                (dx == -1 && dy == 0) || // Izquierda
                (dx == -1 && dy == 1) || // Diagonal Abajo Izquierda
@@ -101,6 +104,7 @@ public class DrawLine : Command //Dibuja una linea desde la posicion de WallE y 
                (dx == 1 && dy == -1) || // Diagonal Arriba Derecha
                (dx == 0 && dy == -1);   // Arriba
     }
+
     private void DrawRecursiveLine(GridManager gridManager, Wall_E wallE, int currentX, int currentY, int distance)
     {
         if (distance <= 0) return;
@@ -140,7 +144,7 @@ public class DrawCircle : Command  //Dibuja un circulo con centro en la posicion
         this.dirY = dirY;
         this.radius = radius;
     }
-    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
+    public override void Execute(Context context)
     {
         throw new NotImplementedException();
     }
@@ -158,7 +162,7 @@ public class DrawRectangle : Command // Dibuja un rectangulo con esquina superio
         this.height = height;
     }
 
-    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
+    public override void Execute(Context context)
     {
         throw new NotImplementedException();
     }
@@ -166,7 +170,7 @@ public class DrawRectangle : Command // Dibuja un rectangulo con esquina superio
 
 public class Fill : Command //Pinta con el color actual todos los pixeles del mismo color que la posicion de WallE contiguos a este
 {
-    public override void Execute(GridManager gridManager, Wall_E wallE, VariableManager variables)
+    public override void Execute(Context context)
     {
         throw new NotImplementedException();
     }

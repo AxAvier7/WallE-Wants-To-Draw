@@ -7,7 +7,7 @@ public class Lexer
     private int position;
     private int line;
     private int column;
-    public List<LexErrors>? LexerErrors {get;}
+    public List<LexErrors> LexerErrors {get;}
     private readonly Regex[] regexPatterns = {
         new Regex(@"^(<-|==|>=|<=)"), //operadores de varios caracteres
         new Regex(@"^(Spawn|GoTo|Color|Size|DrawLine|DrawCircle|DrawRectangle|Fill|GetActualX|GetActualY|GetCanvasSize|GetColorCount|IsBrushColor|IsBrushSize|IsCanvasColor)\b"), //Metodos

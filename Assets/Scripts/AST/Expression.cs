@@ -2,9 +2,9 @@ using UnityEngine;
 
 public abstract class Expression
 {
-    public virtual int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public virtual ExValue Evaluate(Context context)
     {
-        return int.MaxValue;
+        return default;
     }
 }
 
@@ -17,7 +17,7 @@ public class NumberLiteral : Expression
         this.value = value;
     }
 
-    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public override ExValue Evaluate(Context context)
     {
         return value;
     }
@@ -32,8 +32,8 @@ public class StringLiteral : Expression
         this.value = value;
     }
 
-    //Este execute devuelve 0 porque no es necesario que los strings se ejecuten
-    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    //Este Evaluate devuelve 0 porque no es necesario que los strings se ejecuten
+    public override ExValue Evaluate(Context context)
     {
         return 0;
     }
@@ -41,25 +41,25 @@ public class StringLiteral : Expression
 
 public class GetActualX : Expression
 {
-    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public override ExValue Evaluate(Context context)
     {
-        return wall_E.GetActualX();
+        return context.WallE.GetActualX();
     }
 }
 
 public class GetActualY : Expression
 {
-    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public override ExValue Evaluate(Context context)
     {
-        return wall_E.GetActualY();
+        return context.WallE.GetActualY();
     }
 }
 
 public class GetCanvasSize : Expression
 {
-    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public override ExValue Evaluate(Context context)
     {
-        return gridManager.Width;
+        return context.GridManager.Width;
     }
 }
 
@@ -76,17 +76,17 @@ public class GetColorCount : Expression
         this.x2 = x2;
         this.y2 = y2;
     }
-    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public override ExValue Evaluate(Context context)
     {
         int minX = Mathf.Min(x1, x2);
         int maxX = Mathf.Min(x1, x2);
         int minY = Mathf.Min(y1, y2);
         int maxY = Mathf.Min(y1, y2);
 
-        minX = Mathf.Clamp(minX, 0, gridManager.Width - 1);
-        maxX = Mathf.Clamp(maxX, 0, gridManager.Width - 1);
-        minY = Mathf.Clamp(minY, 0, gridManager.Height - 1);
-        maxY = Mathf.Clamp(maxY, 0, gridManager.Height - 1);
+        minX = Mathf.Clamp(minX, 0, context.GridManager.Width - 1);
+        maxX = Mathf.Clamp(maxX, 0, context.GridManager.Width - 1);
+        minY = Mathf.Clamp(minY, 0, context.GridManager.Height - 1);
+        maxY = Mathf.Clamp(maxY, 0, context.GridManager.Height - 1);
 
         int count = 0;
 
@@ -94,7 +94,7 @@ public class GetColorCount : Expression
         {
             for (int y = minY; y < maxY; y++)
             {
-                if (gridManager.GetPixelColorName(x, y) == color)
+                if (context.GridManager.GetPixelColorName(x, y) == color)
                     count++;
             }
         }
@@ -109,9 +109,9 @@ public class IsBrushColor : Expression
     {
         this.color = color;
     }
-    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public override ExValue Evaluate(Context context)
     {
-        return wall_E.currentColor == color? 1 : 0;
+        return context.WallE.currentColor == color? 1 : 0;
     }
 }
 
@@ -122,9 +122,9 @@ public class IsBrushSize : Expression
     {
         this.size = size;
     }
-    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public override ExValue Evaluate(Context context)
     {
-        return wall_E.currentBrushSize == size ? 1 : 0;
+        return context.WallE.currentBrushSize == size ? 1 : 0;
     }
 }
 
@@ -138,12 +138,12 @@ public class IsCanvasColor : Expression
         this.vertical = vertical;
         this.horizontal = horizontal;
     }
-    public override int Execute(Wall_E wall_E, GridManager gridManager, VariableManager variables)
+    public override ExValue Evaluate(Context context)
     {
-        int checkX = wall_E.X + horizontal;
-        int checkY = wall_E.Y + vertical;
-        if (checkX < 0 || checkY < 0 || checkX >= gridManager.Width || checkY >= gridManager.Height)
+        int checkX = context.WallE.X + horizontal;
+        int checkY = context.WallE.Y + vertical;
+        if (checkX < 0 || checkY < 0 || checkX >= context.GridManager.Width || checkY >= context.GridManager.Height)
             return 0;
-        return gridManager.GetPixelColorName(checkX, checkY) == color ? 1 : 0;
+        return context.GridManager.GetPixelColorName(checkX, checkY) == color ? 1 : 0;
     }
 }
