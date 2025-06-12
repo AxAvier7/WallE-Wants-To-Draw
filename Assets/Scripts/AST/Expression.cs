@@ -32,14 +32,13 @@ public class StringLiteral : Expression
         this.value = value;
     }
 
-    //Este Evaluate devuelve 0 porque no es necesario que los strings se ejecuten
     public override ExValue Evaluate(Context context)
     {
-        return 0;
+        return value;
     }
 }
 
-public class GetActualX : Expression
+public class GetActualX : Expression // Devuelve la coordenada x actual de WallE
 {
     public override ExValue Evaluate(Context context)
     {
@@ -47,7 +46,7 @@ public class GetActualX : Expression
     }
 }
 
-public class GetActualY : Expression
+public class GetActualY : Expression // Devuelve la coordenada x actual de WallE
 {
     public override ExValue Evaluate(Context context)
     {
@@ -55,7 +54,7 @@ public class GetActualY : Expression
     }
 }
 
-public class GetCanvasSize : Expression
+public class GetCanvasSize : Expression // Devuelve el ancho/largo delcanvas
 {
     public override ExValue Evaluate(Context context)
     {
@@ -63,7 +62,7 @@ public class GetCanvasSize : Expression
     }
 }
 
-public class GetColorCount : Expression
+public class GetColorCount : Expression // Devuelve la cantidad de casillas que hay del color 'color' en el rectangulo formado por las dos esquinas (x1,y1) y (x2,y2)
 {
     string color;
     int x1, y1, x2, y2;
@@ -102,7 +101,7 @@ public class GetColorCount : Expression
     }
 }
 
-public class IsBrushColor : Expression
+public class IsBrushColor : Expression // Devuelve 1 si el color actual de la brocha es 'color'. Si no devuelve 0
 {
     string color;
     public IsBrushColor(string color)
@@ -115,7 +114,7 @@ public class IsBrushColor : Expression
     }
 }
 
-public class IsBrushSize : Expression
+public class IsBrushSize : Expression  // Devuelve 1 si el tamaño actual de la brocha es 'size'. Si no devuelve 0
 {
     int size;
     public IsBrushSize(int size)
@@ -128,7 +127,7 @@ public class IsBrushSize : Expression
     }
 }
 
-public class IsCanvasColor : Expression
+public class IsCanvasColor : Expression // Devuelve 1 si la casilla en (GetActualX + horizontal, GetActualY + vertical) es de color 'color'
 {
     string color;
     int vertical, horizontal;

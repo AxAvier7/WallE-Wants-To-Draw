@@ -12,7 +12,12 @@ public static class ColorManager
         {"Purple", new UnityEngine.Color(0.5f, 0f, 0.5f)},
         {"Black", UnityEngine.Color.black},
         {"White", UnityEngine.Color.white},
-        {"Transparent", new UnityEngine.Color(0,0,0,0)}
+        {"Gray", new UnityEngine.Color(120, 120, 120, 255)},
+        {"Pink", new UnityEngine.Color(255, 0, 255, 255)},
+        {"LightBlue", new UnityEngine.Color(0, 200, 255, 255)},
+        {"LightGreen", new UnityEngine.Color(0, 255, 100, 255)},
+        {"Brown", new UnityEngine.Color(85, 45, 0, 255)},
+        { "Transparent", new UnityEngine.Color(0, 0, 0, 0)}
     };
 
     public static UnityEngine.Color GetUnityColor(string colorName)

@@ -52,9 +52,10 @@ public class GridManager : MonoBehaviour
     {
         if (x >= 0 && x < Width && y >= 0 && y < Height)
         {
-            colorNames[x, y] = colorName;
             UnityEngine.Color color = ColorManager.GetUnityColor(colorName);
             pixels[x, y].SetColor(color);
+            colorNames[x, y] = colorName;
+            pixels[x, y].UpdateColor();
         }
     }
 

@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using Debug = UnityEngine.Debug;
 
 public class Wall_E
 {

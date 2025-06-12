@@ -35,31 +35,51 @@ public class FunctionCallNode : ExpressionNode
 
     public override ExValue Evaluate(Context context)
     {
-        List<int> evaluatedArgs = new List<int>();
+        List<ExValue> evaluatedArgs = new List<ExValue>();
         foreach (var arg in Arguments)
         {
-            evaluatedArgs.Add(arg.Evaluate(context).AsInt());
+            evaluatedArgs.Add(arg.Evaluate(context));
         }
 
         switch (FunctionName)
         {
             case "GetActualX":
+                ValidateArgumentCount(0);
                 return context.WallE.GetActualX();
+
             case "GetActualY":
+                ValidateArgumentCount(0);
                 return context.WallE.GetActualY();
+
             case "GetCanvasSize":
+                ValidateArgumentCount(0);
                 return context.GridManager.Width;
-            // case "GetColorCount":
-            //     return new GetColorCount(evaluatedArgs[0], evaluatedArgs[1], evaluatedArgs[2], evaluatedArgs[3], evaluatedArgs[4]).Execute(wall_E, gridManager);
-            // case "IsBrushColor":
-            //     return new IsBrushColor(evaluatedArgs[0]).Execute(wall_E, gridManager);
+
+            case "GetColorCount":
+                ValidateArgumentCount(5);
+                return new GetColorCount(evaluatedArgs[0].AsString(), evaluatedArgs[1].AsInt(), evaluatedArgs[2].AsInt(), evaluatedArgs[3].AsInt(), evaluatedArgs[4].AsInt()).Evaluate(context);
+            
+            case "IsBrushColor":
+                ValidateArgumentCount(1);
+                return new IsBrushColor(evaluatedArgs[0].AsString()).Evaluate(context);
+            
             case "IsBrushSize":
-                return new IsBrushSize(evaluatedArgs[0]).Evaluate(context);
-            // case "IsCanvasColor":
-            //     return new IsCanvasColor(evaluatedArgs[0], evaluatedArgs[1], evaluatedArgs[2], evaluatedArgs[3], evaluatedArgs[4]).Execute(wall_E, gridManager);
+                ValidateArgumentCount(1);
+                return new IsBrushSize(evaluatedArgs[0].AsInt()).Evaluate(context);
+            
+            case "IsCanvasColor":
+                ValidateArgumentCount(3);
+                return new IsCanvasColor(evaluatedArgs[0].AsString(), evaluatedArgs[1].AsInt(), evaluatedArgs[2].AsInt()).Evaluate(context);
+            
             default:
                 throw new System.Exception($"Unknown function: {FunctionName}");
         }
+    }
+
+    public void ValidateArgumentCount(int expectedCount)
+    {
+        if(Arguments.Count != expectedCount)
+            throw new System.Exception($"Expected {expectedCount} argument but recieved {Arguments.Count}");
     }
 }
 

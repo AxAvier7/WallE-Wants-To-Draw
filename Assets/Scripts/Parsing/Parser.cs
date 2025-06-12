@@ -36,29 +36,37 @@ public class Parser : MonoBehaviour
             case TokenType.Size:
                 currentPosition++;
                 return ParseSize();
-            // case TokenType.DrawLine:
-            //     currentPosition++;
-            //     return ParseDrawLine();
+            case TokenType.DrawLine:
+                currentPosition++;
+                return ParseDrawLine();
+            case TokenType.DrawCircle:
+                currentPosition++;
+                return ParseDrawCircle();
+            case TokenType.DrawRectangle:
+                currentPosition++;
+                return ParseDrawRectangle();
+            case TokenType.Fill:
+                currentPosition++;
+                return ParseFill();
+
             default:
                 throw new Exception($"Unexpected token: {currentToken}");
         }
     }
 
-
     private Command ParseSpawn()
     {
-        Consume(TokenType.OpenParenthesis, "Expected '(' after 'spawn'");
+        Consume(TokenType.OpenParenthesis, "Expected '(' after 'Spawn'");
         var x = ParseNumber();
         Consume(TokenType.Comma, "Expected ',' after x coordinate");
         var y = ParseNumber();
         Consume(TokenType.ClosedParenthesis, "Expected ')' after y coordinate");
-        Debug.Log($"Parsed Spawn command with coordinates ({x}, {y})");
         return new Spawn(x, y);
     }
     
     private Command ParseColor()
     {
-        Consume(TokenType.OpenParenthesis, "Expected '(' after 'color'");
+        Consume(TokenType.OpenParenthesis, "Expected '(' after 'Color'");
         string color;
         switch (tokens[currentPosition].Type)
         {
@@ -94,29 +102,63 @@ public class Parser : MonoBehaviour
         }
         currentPosition++;
         Consume(TokenType.ClosedParenthesis, "Expected ')' after color string");
-        Debug.Log($"Parsed Color command with color '{color}'");
         return new Color(color);
     }
 
     private Command ParseSize()
     {
-        Consume(TokenType.OpenParenthesis, "Expected '(' after 'size'");
+        Consume(TokenType.OpenParenthesis, "Expected '(' after 'Size'");
         int size = ParseNumber();
         Consume(TokenType.ClosedParenthesis, "Expected ')' after size number");
-        Debug.Log($"Parsed Size command with size {size}");
         return new Size(size);
     }
 
-    private string ParseStringLiteral()
+    private Command ParseDrawLine()
     {
-        Token currentToken = tokens[currentPosition];
-        if (currentToken.Type != TokenType.String)
-        {
-            throw new Exception($"Expected string literal, found: {currentToken}");
-        }
-        string value = currentToken.Value;
-        currentPosition++;
-        return value;
+        Consume(TokenType.OpenParenthesis, "Expected '(' after 'Spawn'");
+        var dirX = ParseNumber();
+        Consume(TokenType.Comma, "Expected ',' after x direction");
+        var dirY = ParseNumber();
+        Consume(TokenType.Comma, "Expected ',' after y direction");
+        var distance = ParseNumber();
+        Consume(TokenType.ClosedParenthesis, "Expected ')' after distance");
+        return new DrawLine(dirX, dirY, distance);
+    }
+
+    private Command ParseDrawCircle()
+    {
+        Consume(TokenType.OpenParenthesis, "Expected '(' after 'DrawCircle'");
+        int dirX = ParseNumber();
+        Consume(TokenType.Comma, "Expected ',' after dirX");
+        var dirY = ParseNumber();
+        Consume(TokenType.Comma, "Expected ',' after dirY");
+        var radius = ParseNumber();
+        Consume(TokenType.ClosedParenthesis, "Expected ')' after radius");
+        return new DrawCircle(dirX, dirY, radius);
+    }
+
+    private Command ParseDrawRectangle()
+    {
+        Consume(TokenType.OpenParenthesis, "Expected '(' after 'DrawRectangle'");
+        int dirX = ParseNumber();
+        Consume(TokenType.Comma, "Expected ',' after x coordinate");
+        int dirY = ParseNumber();
+        Consume(TokenType.Comma, "Expected ',' after y coordinate");
+        int distance = ParseNumber();
+        Consume(TokenType.Comma, "Expected ',' after distance");
+        int width = ParseNumber();
+        Consume(TokenType.Comma, "Expected ',' after width");
+        int height = ParseNumber();
+        Consume(TokenType.ClosedParenthesis, "Expected ')' after height");
+        Debug.Log($"Parsed DrawRectangle command with size ({width}, {height})");
+        return new DrawRectangle(dirX, dirY, distance, width, height);
+    }
+
+    private Command ParseFill()
+    {
+        Consume(TokenType.OpenParenthesis, "Expected '(' after Fill");
+        Consume(TokenType.ClosedParenthesis, "Expected ')' after '('");
+        return new Fill();
     }
 
     private int ParseNumber()

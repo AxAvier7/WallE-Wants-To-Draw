@@ -21,5 +21,11 @@ public class Pixel : MonoBehaviour
         X = x; Y = y;
         SetColor(UnityEngine.Color.white);
     }
+
     public void SetColor(UnityEngine.Color color) => image.color = color;
+    public void UpdateColor()
+    {
+        Canvas.ForceUpdateCanvases();
+        image.SetAllDirty();
+    }
 }

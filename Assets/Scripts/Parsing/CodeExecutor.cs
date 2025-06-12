@@ -77,7 +77,7 @@ public class CodeExecutor : MonoBehaviour
             catch (System.Exception ex)
             {
                 context.SetError(context.Counter, ex.Message);
-                Debug.LogError($"Execution Error at line {context.Counter}: {ex.Message}");
+                Debug.LogError($"Execution Error at line {context.Counter + 1}: {ex.Message}");
                 return;
             }
             if (context.HasError())
