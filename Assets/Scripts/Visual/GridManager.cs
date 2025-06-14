@@ -29,18 +29,19 @@ public class GridManager : MonoBehaviour
         pixels = new Pixel[Width, Height];
         colorNames = new string[Width, Height];
 
-        for (int x = 0; x < Width; x++)
-        {
-            for (int y = 0; y < Height; y++)
+        for (int y = 0; y < Height; y++)
+        {        
+            for (int x = 0; x < Width; x++)
             {
                 GameObject pixelObj = Instantiate(pixelPrefab, gridLayout.transform);
+                pixelObj.transform.localRotation = Quaternion.identity;
                 Pixel pixel = pixelObj.GetComponent<Pixel>();
                 pixel.Initialize(x, y);
                 pixels[x, y] = pixel;
                 colorNames[x, y] = "White";
             }
-        }
-    }
+        }    
+}
 
     public void SetPixelColor(int x, int y, UnityEngine.Color color)
     {

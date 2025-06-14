@@ -63,7 +63,13 @@ public class Token
         {"\"Purple\"", TokenType.Purple},
         {"\"Black\"", TokenType.Black},
         {"\"White\"", TokenType.White},
-        {"\"Transparent\"", TokenType.Transparent}
+        {"\"Gray\"", TokenType.Gray},
+        {"\"Pink\"", TokenType.Pink},
+        {"\"LightBlue\"", TokenType.LightBlue},
+        {"\"LightGreen\"", TokenType.LightGreen},
+        {"\"Brown\"", TokenType.Brown},
+        {"\"LightGray\"", TokenType.LightGray},
+        { "\"Transparent\"", TokenType.Transparent}
     };
 }
 
@@ -94,7 +100,7 @@ public enum TokenType{
     OpenParenthesis, ClosedParenthesis, OpenBrackets, ClosedBrackets,
     Quotations, Comma,
 
-    Red, Blue, Green, Yellow, Orange, Purple, Black, White, Transparent,
+    Red, Blue, Green, Yellow, Orange, Purple, Black, White, Gray, Pink, LightBlue, LightGreen, Brown, LightGray, Transparent,
 
     Unknown
 }

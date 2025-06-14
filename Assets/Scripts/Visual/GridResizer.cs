@@ -23,7 +23,11 @@ public class GridResizer : MonoBehaviour
             return;
 
         float availableWidth = rectTransform.rect.width - gridLayout.padding.left - gridLayout.padding.right;
-        float cellSize = availableWidth / gridLayout.constraintCount;
-        gridLayout.cellSize = new Vector2(cellSize, cellSize);
+        float availableHeight = rectTransform.rect.height - gridLayout.padding.top - gridLayout.padding.bottom;
+        float maxCellSize = Mathf.Min(
+            availableWidth / gridLayout.constraintCount,
+            availableHeight / gridLayout.constraintCount
+        );        
+        gridLayout.cellSize = new Vector2(maxCellSize, maxCellSize);
     }
 }

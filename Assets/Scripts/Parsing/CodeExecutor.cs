@@ -40,10 +40,10 @@ public class CodeExecutor : MonoBehaviour
             }
             return;
         }
-        foreach (var token in tokens)
-        {
-            Debug.Log($"Token: {token.Type} - {token.Value} at {token.Line}:{token.Column}");
-        }
+        // foreach (var token in tokens)
+        // {
+        //     Debug.Log($"Token: {token.Type} - {token.Value} at {token.Line}:{token.Column}");
+        // }
 
         var parser = new Parser();
         List<ASTNode> nodes = parser.Parse(tokens);

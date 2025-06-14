@@ -14,6 +14,10 @@ public class Pixel : MonoBehaviour
         aspectRatioFitter = GetComponent<AspectRatioFitter>();
         aspectRatioFitter.aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
         aspectRatioFitter.aspectRatio = 1;
+
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+        transform.localScale = Vector3.one;
     }
 
     public void Initialize(int x, int y)

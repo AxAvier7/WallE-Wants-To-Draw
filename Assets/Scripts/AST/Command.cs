@@ -11,19 +11,32 @@ public abstract class Command : StatementNode // Clase base para todos los coman
 public class AssignmentCommand : Command
 {
     private string variableName;
-    private Expression expression;
-    public AssignmentCommand(string variableName, Expression expression)
+    private ExpressionNode expression;
+    public AssignmentCommand(string variableName, ExpressionNode expression)
     {
         this.variableName = variableName;
         this.expression = expression;
     }
 
-
-
     public override void Execute(Context context)
     {
         int value = expression.Evaluate(context).AsInt();
         context.Variables.SetVariable(variableName, value);
+    }
+}
+
+public class ExpressionStatement : Command
+{
+    private ExpressionNode expression;
+
+    public ExpressionStatement(ExpressionNode expression)
+    {
+        this.expression = expression;
+    }
+
+    public override void Execute(Context context)
+    {
+        expression.Evaluate(context);
     }
 }
 
@@ -44,7 +57,7 @@ public class Spawn : Command //Posiciona al Wall-E en las coordenadas (x, y) del
     }
 }
 
-public class Color : Command //Cambia el color del pinc
+public class Color : Command //Cambia el color del WallE
 {
     string color;
     public Color(string color)
@@ -91,14 +104,20 @@ public class DrawLine : Command //Dibuja una linea desde la posicion de WallE y 
     {
         if (context.WallE.currentColor == "Transparent")
         {
-            context.SetError(Line, "Cannot draw with transparent color");
+            context.WallE.Move(dirX * distance, dirY * distance);
             return;
         }
+
         if (!IsValidDirection(dirX, dirY))
             context.SetError(Line, "Invalid direction for drawing line");
-        DrawRecursiveLine(context, context.WallE.X, context.WallE.Y, distance);
-        context.WallE.Move(dirX * distance, dirY * distance);
-        Debug.Log($"Drew a line from ({context.WallE.X},{context.WallE.Y}) to ({context.WallE.X + dirX * distance},{context.WallE.Y + dirY * distance}) with {context.WallE.currentColor}");
+
+        int endX = context.WallE.X + dirX * (distance - 1);
+        int endY = context.WallE.Y + dirY * (distance - 1);
+
+        DrawingUtils.DrawLineBresenham(context, context.WallE.X, context.WallE.Y, endX, endY);
+
+        context.WallE.SetSpawnPoint(endX, endY);
+        Debug.Log($"Drew a line from ({context.WallE.X},{context.WallE.Y}) to ({context.WallE.X + dirX * distance -1},{context.WallE.Y + dirY * distance-1}) with {context.WallE.currentColor}");
     }
 
     private bool IsValidDirection(int dx, int dy)
@@ -110,21 +129,26 @@ public class DrawLine : Command //Dibuja una linea desde la posicion de WallE y 
                (dx == 1 && dy == 1) || // Diagonal Abajo Derecha
                (dx == 1 && dy == 0) || // Derecha
                (dx == 1 && dy == -1) || // Diagonal Arriba Derecha
-               (dx == 0 && dy == -1) ||
-               (dx == 0 && dy == 0);   // Arriba
+               (dx == 0 && dy == -1) || // Arriba
+               (dx == 0 && dy == 0); //No se mueve
     }
 
     private void DrawRecursiveLine(Context context, int currentX, int currentY, int distance)
-    {
+    {        
+        if (currentX >= 0 || currentX < context.GridManager.Width || currentY >= 0 || currentY < context.GridManager.Height)
+                DrawingUtils.DrawBrushAt(context, currentX, currentY);
+
+        else
+        {
+            context.SetError(Line, $"Point ({currentX},{currentY}) is out of bounds");
+            return;
+        }
+
         if (distance <= 0) return;
 
         int nextX = currentX + dirX;
         int nextY = currentY + dirY;
 
-        if (nextX < 0 || nextX >= context.GridManager.Width || nextY < 0 || nextY >= context.GridManager.Height)
-            context.SetError(Line, "Drawing line out of bounds");
-
-        DrawingUtils.DrawBrushAt(context, currentX, currentY);
         DrawRecursiveLine(context, nextX, nextY, distance - 1);
     }
 }

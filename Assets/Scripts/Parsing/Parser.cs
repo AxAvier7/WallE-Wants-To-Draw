@@ -48,7 +48,16 @@ public class Parser : MonoBehaviour
             case TokenType.Fill:
                 currentPosition++;
                 return ParseFill();
-
+            case TokenType.Variable:
+                return ParseVariableOrAssignment();
+            case TokenType.GetActualX:
+            case TokenType.GetActualY:
+            case TokenType.GetCanvasSize:
+            case TokenType.GetColorCount:
+            case TokenType.IsBrushColor:
+            case TokenType.IsBrushSize:
+            case TokenType.IsCanvasColor:
+                return ParseExpressionStatement();
             default:
                 throw new Exception($"Unexpected token: {currentToken}");
         }
@@ -94,6 +103,24 @@ public class Parser : MonoBehaviour
             case TokenType.White:
                 color = "White";
                 break;
+            case TokenType.Gray:
+                color = "Gray";
+                break;
+            case TokenType.Pink:
+                color = "Pink";
+                break;
+            case TokenType.LightBlue:
+                color = "LightBlue";
+                break;
+            case TokenType.LightGreen:
+                color = "LightGreen";
+                break;
+            case TokenType.Brown:
+                color = "Brown";
+                break;
+            case TokenType.LightGray:
+                color = "LightGray";
+                break;                
             case TokenType.Transparent:
                 color = "Transparent";
                 break;
@@ -159,6 +186,102 @@ public class Parser : MonoBehaviour
         Consume(TokenType.OpenParenthesis, "Expected '(' after Fill");
         Consume(TokenType.ClosedParenthesis, "Expected ')' after '('");
         return new Fill();
+    }
+
+    private Command ParseVariableOrAssignment()
+    {
+        string variableName = tokens[currentPosition].Value;
+        currentPosition++;
+        if(currentPosition < tokens.Count && tokens[currentPosition].Type == TokenType.AssignationArrow)
+        {
+            Consume(TokenType.AssignationArrow, "Expected '<-' after variable name");
+            ExpressionNode expression = ParseExpression();
+            return new AssignmentCommand(variableName, expression);
+        }
+        else
+        {
+            return new ExpressionStatement(new VariableNode(variableName));
+        }
+    }
+
+    private Command ParseExpressionStatement()
+    {
+        ExpressionNode expr = ParseExpression();
+        return new ExpressionStatement(expr);
+    }
+
+    private ExpressionNode ParseExpression()
+    {
+        Token token = tokens[currentPosition];
+
+        //Para Expression sin argumentos
+        if (token.Type == TokenType.GetActualX || token.Type == TokenType.GetActualY || token.Type == TokenType.GetCanvasSize)
+        {
+            string funcName = token.Value;
+            currentPosition++;
+            return new FunctionCallNode(funcName, new List<ExpressionNode>());
+        }
+
+        //Para Expression con argumentos
+        if (token.Type == TokenType.GetColorCount || token.Type == TokenType.IsBrushColor || token.Type == TokenType.IsBrushSize || token.Type == TokenType.IsCanvasColor)
+        {
+            string funcName = token.Value;
+            currentPosition++;
+            Consume(TokenType.OpenParenthesis, $"Expected '(' after '{funcName}'");
+            var args = new List<ExpressionNode>();
+
+            switch (funcName)
+            {
+                case "GetColorCount":
+                    args.Add(ParseExpression()); //color
+                    Consume(TokenType.Comma, "Expected ',' after color string");
+                    args.Add(ParseExpression()); //x1
+                    Consume(TokenType.Comma, "Expected ',' after x1 coordinate");
+                    args.Add(ParseExpression()); //y1
+                    Consume(TokenType.Comma, "Expected ',' after y1 coordinate");
+                    args.Add(ParseExpression()); //x2
+                    Consume(TokenType.Comma, "Expected ',' after x2 coordinate");
+                    args.Add(ParseExpression()); //y2
+                    break;
+
+                case "IsBrushColor":
+                    args.Add(ParseExpression()); //color
+                    break;
+
+                case "IsBrushSize":
+                    args.Add(ParseExpression()); //size
+                    break;
+
+                case "IsCanvasColor":
+                    args.Add(ParseExpression()); //color
+                    Consume(TokenType.Comma, "Expected ',' after color string");
+                    args.Add(ParseExpression()); //vertical
+                    Consume(TokenType.Comma, "Expected ',' after vertical int");
+                    args.Add(ParseExpression()); //horizontal
+                    break;
+
+                default:
+                    break;
+            }
+
+            Consume(TokenType.ClosedParenthesis, $"Expected ')' after arguments for '{funcName}'");
+            return new FunctionCallNode(funcName, args);
+        }
+
+        if (token.Type == TokenType.Variable)
+        {
+            string variableName = token.Value;
+            currentPosition++;
+            return new VariableNode(variableName);
+        }
+
+        if (token.Type == TokenType.Number)
+        {
+            int value = ParseNumber();
+            currentPosition++;
+            return new NumberNode(value);
+        }
+        throw new Exception($"Unexpected token in expression: {token}");
     }
 
     private int ParseNumber()

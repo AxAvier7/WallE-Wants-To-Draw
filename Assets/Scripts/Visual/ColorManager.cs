@@ -17,6 +17,7 @@ public static class ColorManager
         {"LightBlue", new UnityEngine.Color(0, 200, 255, 255)},
         {"LightGreen", new UnityEngine.Color(0, 255, 100, 255)},
         {"Brown", new UnityEngine.Color(85, 45, 0, 255)},
+        {"LightGray", new UnityEngine.Color(160, 160, 160, 255)},
         { "Transparent", new UnityEngine.Color(0, 0, 0, 0)}
     };
 
@@ -28,6 +29,7 @@ public static class ColorManager
         }
         return UnityEngine.Color.white;
     }
+    
     public static bool IsValidColorName(string color)
     {
         return colorMap.ContainsKey(color);
