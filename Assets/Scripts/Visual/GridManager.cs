@@ -56,7 +56,6 @@ public class GridManager : MonoBehaviour
             UnityEngine.Color color = ColorManager.GetUnityColor(colorName);
             pixels[x, y].SetColor(color);
             colorNames[x, y] = colorName;
-            pixels[x, y].UpdateColor();
         }
     }
 

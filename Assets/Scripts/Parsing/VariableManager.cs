@@ -3,21 +3,16 @@ using UnityEngine;
 
 public class VariableManager : MonoBehaviour
 {
-    private Dictionary<string, int> variables = new Dictionary<string, int>();
+    private Dictionary<string, ExValue> variables = new Dictionary<string, ExValue>();
 
-    public void SetVariable(string name, int value)
+    public void SetVariable(string name, ExValue value)
     {
         if (!IsValidVariableName(name))
             throw new System.ArgumentException($"Invalid variable name: {name}");
         variables[name] = value;
     }
 
-    public int GetVariable(string name)
-    {
-        if (variables.TryGetValue(name, out int value))
-            return value;
-        return 0;
-    }
+    public ExValue GetVariable(string name) => variables.TryGetValue(name, out ExValue value) ? value : new ExValue(0);
 
     public bool VariableExists(string name) => variables.ContainsKey(name);
 

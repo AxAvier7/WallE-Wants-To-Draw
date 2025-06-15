@@ -5,17 +5,19 @@ using UnityEngine;
 public abstract class Command : StatementNode // Clase base para todos los comandos que Wall-E puede ejecutar
 {
     public override void Accept(IVisitor visitor) => visitor.Visit(this);
-    
+
 }
 
 public class AssignmentCommand : Command
 {
     private string variableName;
     private ExpressionNode expression;
-    public AssignmentCommand(string variableName, ExpressionNode expression)
+    public AssignmentCommand(string variableName, ExpressionNode expression, int line, int column)
     {
         this.variableName = variableName;
         this.expression = expression;
+        Line = line;
+        Column = column;
     }
 
     public override void Execute(Context context)
@@ -29,9 +31,11 @@ public class ExpressionStatement : Command
 {
     private ExpressionNode expression;
 
-    public ExpressionStatement(ExpressionNode expression)
+    public ExpressionStatement(ExpressionNode expression, int line, int column)
     {
-        this.expression = expression;
+        this.expression = expression;       
+        Line = line;
+        Column = column;
     }
 
     public override void Execute(Context context)
@@ -40,29 +44,67 @@ public class ExpressionStatement : Command
     }
 }
 
+public class GoToNode : Command
+{
+    public string Label { get; }
+    public ExpressionNode Condition { get; }
+    public GoToNode(string label, ExpressionNode condition, int line, int column)
+    {
+        Label = label;
+        Condition = condition;
+        Line = line;
+        Column = column;
+    }
+
+    public override void Execute(Context context)
+    {
+        var condition = Condition.Evaluate(context);
+        if (condition.AsBool())
+        {
+            context.ExecuteGoTo(Label);
+        }
+    }
+
+    public override void Accept(IVisitor visitor) => visitor.Visit(this);
+}
+
+
 public class Spawn : Command //Posiciona al Wall-E en las coordenadas (x, y) del grid
 {
-    int x, y;
-    public Spawn(int x, int y)
+    ExpressionNode x, y;
+    public Spawn(ExpressionNode x, ExpressionNode y, int line, int column)
     {
         this.x = x;
         this.y = y;
+        Line = line;
+        Column = column;
     }
     public override void Execute(Context context)
     {
-        if (x < 0 || x >= context.GridManager.Width || y < 0 || y >= context.GridManager.Height)
-            throw new Exception("Spawn position is out of bounds");
-        context.WallE.SetSpawnPoint(x, y);
-        Debug.Log($"Spawn set at ({x}, {y})");
+        int xValue = x.Evaluate(context).AsInt();
+        int yValue = y.Evaluate(context).AsInt();
+        
+        if (xValue < 0 || xValue >= context.GridManager.Width || 
+            yValue < 0 || yValue >= context.GridManager.Height)
+        {
+            throw new Exception($"Spawn position ({xValue}, {yValue}) is out of bounds");
+        }
+        
+        context.WallE.SetSpawnPoint(xValue, yValue);
+        Debug.Log($"Spawn set at ({xValue}, {yValue})");
     }
 }
 
 public class Color : Command //Cambia el color del WallE
 {
     string color;
-    public Color(string color)
+    public Color(string color, int line, int column)
     {
+        if (string.IsNullOrEmpty(color))
+            throw new ArgumentException("Color cannot be null or empty");
         this.color = color;
+        Line = line;
+        Column = column;
     }
     public override void Execute(Context context)
     {
@@ -73,14 +115,17 @@ public class Color : Command //Cambia el color del WallE
 
 public class Size : Command //Modifica el tamaño del pincel
 {
-    int k;
-    public Size(int k)
+    ExpressionNode k;
+    public Size(ExpressionNode k, int line, int column)
     {
         this.k = k;
+        Line = line;
+        Column = column;
     }
     public override void Execute(Context context)
     {
-        int actualSize = k % 2 == 0 ? k - 1 : k;
+        int kValue = k.Evaluate(context).AsInt();
+        int actualSize = kValue % 2 == 0 ? kValue - 1 : kValue;
         if (actualSize <= 0)
             throw new Exception("Brush size must be greater than 0");
         context.WallE.SetBrushSize(actualSize);
@@ -90,25 +135,29 @@ public class Size : Command //Modifica el tamaño del pincel
 
 public class DrawLine : Command //Dibuja una linea desde la posicion de WallE y termina en la distancia "distance" en la direccion indicada
 {
-    int dirX, dirY, distance;
+    ExpressionNode dirX, dirY, distance;
 
-    public DrawLine(int dirX, int dirY, int distance)
+    public DrawLine(ExpressionNode dirX, ExpressionNode dirY, ExpressionNode distance, int line, int column)
     {
-        if (distance <= 0)
-            throw new ArgumentException("Distance must be positive");
         this.dirX = dirX;
         this.dirY = dirY;
         this.distance = distance;
+        Line = line;
+        Column = column;
     }
     public override void Execute(Context context)
     {
+        int dirX = this.dirX.Evaluate(context).AsInt();
+        int dirY = this.dirY.Evaluate(context).AsInt();
+        int distance = this.distance.Evaluate(context).AsInt();
+
         if (context.WallE.currentColor == "Transparent")
         {
             context.WallE.Move(dirX * distance, dirY * distance);
             return;
         }
 
-        if (!IsValidDirection(dirX, dirY))
+        if (!DrawingUtils.IsValidDirection(dirX, dirY))
             context.SetError(Line, "Invalid direction for drawing line");
 
         int endX = context.WallE.X + dirX * (distance - 1);
@@ -119,44 +168,12 @@ public class DrawLine : Command //Dibuja una linea desde la posicion de WallE y 
         context.WallE.SetSpawnPoint(endX, endY);
         Debug.Log($"Drew a line from ({context.WallE.X},{context.WallE.Y}) to ({context.WallE.X + dirX * distance -1},{context.WallE.Y + dirY * distance-1}) with {context.WallE.currentColor}");
     }
-
-    private bool IsValidDirection(int dx, int dy)
-    {
-        return (dx == -1 && dy == -1) || // Diagonal Arriba Derecha
-               (dx == -1 && dy == 0) || // Izquierda
-               (dx == -1 && dy == 1) || // Diagonal Abajo Izquierda
-               (dx == 0 && dy == 1) || // Abajo
-               (dx == 1 && dy == 1) || // Diagonal Abajo Derecha
-               (dx == 1 && dy == 0) || // Derecha
-               (dx == 1 && dy == -1) || // Diagonal Arriba Derecha
-               (dx == 0 && dy == -1) || // Arriba
-               (dx == 0 && dy == 0); //No se mueve
-    }
-
-    private void DrawRecursiveLine(Context context, int currentX, int currentY, int distance)
-    {        
-        if (currentX >= 0 || currentX < context.GridManager.Width || currentY >= 0 || currentY < context.GridManager.Height)
-                DrawingUtils.DrawBrushAt(context, currentX, currentY);
-
-        else
-        {
-            context.SetError(Line, $"Point ({currentX},{currentY}) is out of bounds");
-            return;
-        }
-
-        if (distance <= 0) return;
-
-        int nextX = currentX + dirX;
-        int nextY = currentY + dirY;
-
-        DrawRecursiveLine(context, nextX, nextY, distance - 1);
-    }
 }
 
 public class DrawCircle : Command  //Dibuja un circulo con centro en la posicion de WallE y con radio "radius"
 {
-    int dirX, dirY, radius;
-    public DrawCircle(int dirX, int dirY, int radius, int line = 0, int column = 0)
+    ExpressionNode dirX, dirY, radius;
+    public DrawCircle(ExpressionNode dirX, ExpressionNode dirY, ExpressionNode radius, int line, int column)
     {
         this.dirX = dirX;
         this.dirY = dirY;
@@ -166,57 +183,40 @@ public class DrawCircle : Command  //Dibuja un circulo con centro en la posicion
     }
     public override void Execute(Context context)
     {
-        if (context.WallE.currentColor == "Transparent")
-        {
-            context.WallE.Move(dirX * radius, dirY * radius);
-            return;
-        }
+        int dirX = this.dirX.Evaluate(context).AsInt();
+        int dirY = this.dirY.Evaluate(context).AsInt();
+        int radius = this.radius.Evaluate(context).AsInt();
+
+        if (radius < 0)
+            throw new ArgumentException("Radius must be positive");
+
+        if (!DrawingUtils.IsValidDirection(dirX, dirY))
+            if (context.WallE.currentColor == "Transparent")
+            {
+                context.WallE.Move(dirX * radius, dirY * radius);
+                return;
+            }
 
         int centerX = context.WallE.X + dirX * radius;
         int centerY = context.WallE.Y + dirY * radius;
+
+        if(radius==0) DrawingUtils.DrawBrushAt(context, centerX, centerY);
+
         if (centerX < 0 || centerX >= context.GridManager.Width || centerY < 0 || centerY >= context.GridManager.Height)
         {
             context.SetError(Line, "Circle center out of bounds");
             return;
         }
 
-        DrawCirclePoints(context, centerX, centerY, radius);
+        DrawingUtils.DrawCirclePoints(context, centerX, centerY, radius);
         context.WallE.SetSpawnPoint(centerX, centerY);
-    }
-
-    private void DrawCirclePoints(Context context, int centerX, int centerY, int radius)
-    {
-        int x = radius;
-        int y = 0;
-        int isDrawOver = 1 - x;
-
-        while (x >= y)
-        {
-            DrawingUtils.DrawBrushAt(context, centerX + x, centerY + y);
-            DrawingUtils.DrawBrushAt(context, centerX - x, centerY + y);
-            DrawingUtils.DrawBrushAt(context, centerX + x, centerY - y);
-            DrawingUtils.DrawBrushAt(context, centerX - x, centerY - y);
-            DrawingUtils.DrawBrushAt(context, centerX + y, centerY + x);
-            DrawingUtils.DrawBrushAt(context, centerX - y, centerY + x);
-            DrawingUtils.DrawBrushAt(context, centerX + y, centerY - x);
-            DrawingUtils.DrawBrushAt(context, centerX - y, centerY - x);
-
-            y++;
-            if (isDrawOver <= 0)
-                isDrawOver += 2 * y + 1;
-            else
-            {
-                x--;
-                isDrawOver += 2 * (y - x) + 1;
-            }
-        }
     }
 }
 
 public class DrawRectangle : Command // Dibuja un rectangulo con esquina superior izquierda en la posicion de WallE y con ancho "width" y alto "height"
 {
-    int dirX, dirY, distance, width, height;
-    public DrawRectangle(int dirX, int dirY, int distance, int width, int height, int line = 0, int column = 0)
+    ExpressionNode dirX, dirY, distance, width, height;
+    public DrawRectangle(ExpressionNode dirX, ExpressionNode dirY, ExpressionNode distance, ExpressionNode width, ExpressionNode height, int line, int column)
     {
         this.dirX = dirX;
         this.dirY = dirY;
@@ -229,6 +229,19 @@ public class DrawRectangle : Command // Dibuja un rectangulo con esquina superio
 
     public override void Execute(Context context)
     {
+        int dirX = this.dirX.Evaluate(context).AsInt();
+        int dirY = this.dirY.Evaluate(context).AsInt();
+        int distance = this.distance.Evaluate(context).AsInt();
+        int width = this.width.Evaluate(context).AsInt();
+        int height = this.height.Evaluate(context).AsInt();
+
+
+        if (width < 0 || height < 0)
+        {
+            context.SetError(Line, "Rectangle dimensions must be positive");
+            return;
+        }
+
         if (context.WallE.currentColor == "Transparent")
         {
             context.WallE.Move(dirX * distance, dirY * distance);
@@ -248,7 +261,7 @@ public class DrawRectangle : Command // Dibuja un rectangulo con esquina superio
 
         if (centerX < 0 || centerX >= context.GridManager.Width || centerY < 0 || centerY >= context.GridManager.Height)
         {
-            context.SetError(Line, "Circle center out of bounds");
+            context.SetError(Line, $"Rectangle center ({centerX},{centerY}) out of bounds");
             return;
         }
 
@@ -263,7 +276,7 @@ public class DrawRectangle : Command // Dibuja un rectangulo con esquina superio
 
 public class Fill : Command // Pinta con el color actual todos los pixeles del mismo color que la posicion de WallE contiguos a este
 {
-    public Fill(int line = 0, int column = 0)
+    public Fill(int line, int column)
     {
         Line = line;
         Column = column;
@@ -278,40 +291,6 @@ public class Fill : Command // Pinta con el color actual todos los pixeles del m
         if (targetColor == context.WallE.currentColor)
             return;
 
-        FloodFill(context, context.WallE.X, context.WallE.Y, targetColor);
-    }
-
-    private void FloodFill(Context context, int startX, int startY, string targetColor)
-    {
-        Queue<Vector2Int> qeue = new Queue<Vector2Int>();
-        qeue.Enqueue(new Vector2Int(startX, startY));
-
-        Vector2Int[] directions = {
-            new Vector2Int(0, 1),
-            new Vector2Int(1, 0),
-            new Vector2Int(0, -1),
-            new Vector2Int(-1, 0)
-        };
-
-        while (qeue.Count > 0)
-        {
-            Vector2Int point = qeue.Dequeue();
-            int x = point.x;
-            int y = point.y;
-
-            if (x < 0 || x >= context.GridManager.Width ||
-                y < 0 || y >= context.GridManager.Height)
-                continue;
-
-            if (context.GridManager.GetPixelColorName(x, y) != targetColor)
-                continue;
-
-            context.GridManager.SetPixelColor(x, y, context.WallE.currentColor);
-
-            foreach (Vector2Int dir in directions)
-            {
-                qeue.Enqueue(new Vector2Int(x + dir.x, y + dir.y));
-            }
-        }
+        DrawingUtils.FloodFill(context, context.WallE.X, context.WallE.Y, targetColor);
     }
 }

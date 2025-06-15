@@ -9,13 +9,13 @@ public class Lexer
     private int column;
     public List<LexErrors> LexerErrors {get;}
     private readonly Regex[] regexPatterns = {
-        new Regex(@"^(<-|==|>=|<=)"), //operadores de varios caracteres
+        new Regex(@"^(<-|==|!=|>=|<=|\|\||&&|!)"), //operadores logicos
         new Regex(@"^(Spawn|GoTo|Color|Size|DrawLine|DrawCircle|DrawRectangle|Fill|GetActualX|GetActualY|GetCanvasSize|GetColorCount|IsBrushColor|IsBrushSize|IsCanvasColor)\b"), //Metodos
-        new Regex(@"^[a-zA-Z][a-zA-Z0-9\-]*"), //cadenas alfanumericas para identificadores o variables
+        new Regex(@"^[a-zA-Z][a-zA-Z0-9_\-]*"), //cadenas alfanumericas para identificadores o variables
         new Regex(@"^-?\d+"), //numeros
         new Regex(@"^""[^""]*"""), //strings
-        new Regex(@"^(\+|\-|\*|/|%|\^)"), //operadores artimeticos
-        new Regex(@"^(\[|\]|\(|\)|\,|=|<|>)") //simbolos
+        new Regex(@"^(\+|\-|\*|/|%|\^|!)"), //operadores aritmeticos
+        new Regex(@"^(\[|\]|\(|\)|\,|=|<|>|:)") //simbolos
     };
 
     public Lexer(string Input){
@@ -29,37 +29,70 @@ public class Lexer
     public List<Token> Tokenize(string input)
     {
         var tokens = new List<Token>();
-        while(position<input.Length)
+        while(position < input.Length)
         {
             char current = input[position];
+            bool isStartOfLine = IsStartOfLine(position, input);
 
-            if(char.IsWhiteSpace(input[position]))
+            if (char.IsWhiteSpace(input[position]))
             {
                 AdvancePosition();
                 continue;
             }
-            if(ThereAreComments(current)) continue;
+            
+            if (ThereAreComments(current)) continue;
 
-            bool matched=false;
-            foreach(var regex in regexPatterns)
+            bool matched = false;
+            
+            foreach (var regex in regexPatterns)
             {
                 var match = regex.Match(input.Substring(position));
-                if(match.Success && match.Index == 0)
+                if (match.Success && match.Index == 0)
                 {
+                    string value = match.Value;
+                    int currentPositionBefore = position;
+
+                    if (isStartOfLine && regex == regexPatterns[2])
+                    {
+                        int lookaheadPos = position + value.Length;
+                        while (lookaheadPos < input.Length && char.IsWhiteSpace(input[lookaheadPos]))
+                        {
+                            lookaheadPos++;
+                        }
+                        if (lookaheadPos + 1 < input.Length && input[lookaheadPos] == '<' && input[lookaheadPos + 1] == '-')
+                        {
+                            tokens.Add(new Token(TokenType.Variable, value, line, column));
+                            position += value.Length;
+                            column += value.Length;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched && isStartOfLine && regex == regexPatterns[2] && !IsCommandOrKeyword(value))
+                    {
+                        tokens.Add(new Token(TokenType.Label, value, line, column));
+                        position += value.Length;
+                        column += value.Length;
+                        matched = true;
+                        break;
+                    }
+
                     MatchProcessing(match.Value, tokens);
-                    position+=match.Length;
-                    column+=match.Length;
+                    position += match.Length;
+                    column += match.Length;
                     matched = true;
                     break;
                 }
+            }
 
-            }                
-            if(!matched)
+            if (!matched)
             {
-                LexerErrors?.Add(new LexErrors($"Caracter invalido \"{input[position]}\"", line, column));
+                LexerErrors.Add(new LexErrors($"Caracter invalido \"{input[position]}\"", line, column));
                 AdvancePosition();
             }
         }
+        
+        tokens.Add(new Token(TokenType.EOF, "", line, column));
         return tokens;
     }
 
@@ -103,8 +136,38 @@ public class Lexer
         return false;
     }
 
-    private void AdvancePosition(){
-        if(position < input.Length && input[position] == '\n')
+    private bool IsStartOfLine(int position, string input)
+    {
+        if (position == 0) return true;
+        
+        for (int i = position - 1; i >= 0; i--)
+        {
+            if (input[i] == '\n') return true;
+            if (!char.IsWhiteSpace(input[i])) return false;
+        }
+        return true;
+    }
+
+    private bool IsCommandOrKeyword(string value)
+    {
+        string[] reservedWords = {
+            "Spawn", "GoTo", "Color", "Size", "DrawLine", "DrawCircle", 
+            "DrawRectangle", "Fill", "GetActualX", "GetActualY", "GetCanvasSize", 
+            "GetColorCount", "IsBrushColor", "IsBrushSize", "IsCanvasColor",
+            "and", "or", "true", "false"
+        };
+
+        foreach (string word in reservedWords)
+        {
+            if (value == word)
+                return true;
+        }
+        return false;
+    }
+
+    private void AdvancePosition()
+    {
+        if (position < input.Length && input[position] == '\n')
         {
             line++;
             column = 1;

@@ -8,36 +8,6 @@ public abstract class Expression
     }
 }
 
-public class NumberLiteral : Expression
-{
-    private int value;
-
-    public NumberLiteral(int value)
-    {
-        this.value = value;
-    }
-
-    public override ExValue Evaluate(Context context)
-    {
-        return value;
-    }
-}
-
-public class StringLiteral : Expression
-{
-    private string value;
-
-    public StringLiteral(string value)
-    {
-        this.value = value;
-    }
-
-    public override ExValue Evaluate(Context context)
-    {
-        return value;
-    }
-}
-
 public class GetActualX : Expression // Devuelve la coordenada x actual de WallE
 {
     public override ExValue Evaluate(Context context)

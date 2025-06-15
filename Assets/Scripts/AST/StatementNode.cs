@@ -28,7 +28,7 @@ public class CommandNode : StatementNode
     public string CommandName { get; }
     public List<ExpressionNode> Arguments { get; }
 
-    public CommandNode(string commandName, List<ExpressionNode> arguments, int line = 0, int column = 0)
+    public CommandNode(string commandName, List<ExpressionNode> arguments, int line, int column)
     {
         CommandName = commandName;
         Arguments = arguments;
@@ -44,50 +44,16 @@ public class CommandNode : StatementNode
     }
 }
 
-public class GoToNode : StatementNode
-{
-    public string Label { get; }
-    public ExpressionNode Condition { get; }
-    public GoToNode(string label, ExpressionNode condition, int line = 0, int column = 0)
-    {
-        Label = label;
-        Condition = condition;
-        Line = line;
-        Column = column;
-    }
-
-    public override void Execute(Context context)
-    {
-        var condition = Condition.Evaluate(context);
-        if (condition.AsBool())
-        {
-            context.JumpToLabel(Label);
-        }
-    }
-
-    public override void Accept(IVisitor visitor) => visitor.Visit(this);
-}
-
 public class LabelNode : StatementNode
 {
     public string LabelName { get; }
-    public LabelNode(string name, int line = 0, int column = 0)
+    public LabelNode(string name, int line, int column)
     {
         LabelName = name;
         Line = line;
         Column = column;
     }
 
-    public override void Accept(IVisitor visitor) => visitor.Visit(this);
-
-    public override void Execute(Context context)
-    {
-        throw new System.NotImplementedException();
-    }
-}
-
-public class FunctionCallStatement : StatementNode
-{
     public override void Accept(IVisitor visitor) => visitor.Visit(this);
 
     public override void Execute(Context context)

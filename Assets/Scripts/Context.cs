@@ -25,7 +25,7 @@ public class Context
         Debug.LogError($"Error at line {line}: {message}");
     }
     
-    public void JumpToLabel(string label)
+    public void ExecuteGoTo(string label)
     {
         if (Labels.TryGetValue(label, out int target))
         {
@@ -35,6 +35,16 @@ public class Context
         {
             SetError(Counter, $"Label '{label}' not found.");
         }
+    }
+
+    public void RegisterLabel(string label, int lineNumber)
+    {
+        if (Labels.ContainsKey(label))
+        {
+            SetError(lineNumber, $"Duplicate label: {label}");
+            return;
+        }
+        Labels.Add(label, lineNumber);
     }
 
     public bool HasError() => ErrorLine != -1;

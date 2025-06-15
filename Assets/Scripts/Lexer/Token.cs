@@ -40,15 +40,19 @@ public class Token
         {"*", TokenType.Multiplication},
         {"^", TokenType.Pow},
         {"%", TokenType.Module},
-        {"and", TokenType.And},
-        {"or", TokenType.Or},
+        {"&&", TokenType.And},
+        {"||", TokenType.Or},
         {"==", TokenType.Equals},
         {"!=", TokenType.Different},
-        {">=", TokenType.MajorEqual},
+        {"!", TokenType.Negation}, 
+        { ">=", TokenType.MajorEqual},
         {"<=", TokenType.MinorEqual},
         {">", TokenType.Major},
         {"<", TokenType.Minor},
-        {"(", TokenType.OpenParenthesis},
+        {"true", TokenType._true},
+        {"false", TokenType._false},
+    
+        { "(", TokenType.OpenParenthesis},
         {")", TokenType.ClosedParenthesis},
         {"[", TokenType.OpenBrackets},
         {"]", TokenType.ClosedBrackets},
@@ -69,7 +73,7 @@ public class Token
         {"\"LightGreen\"", TokenType.LightGreen},
         {"\"Brown\"", TokenType.Brown},
         {"\"LightGray\"", TokenType.LightGray},
-        { "\"Transparent\"", TokenType.Transparent}
+        {"\"Transparent\"", TokenType.Transparent}
     };
 }
 
@@ -93,9 +97,9 @@ public enum TokenType{
 
     And, Or,
 
-    Equals, Different, MajorEqual, MinorEqual, Minor, Major,
+    Equals, Different, MajorEqual, MinorEqual, Minor, Major, Negation,
 
-    label,
+    Label,
 
     OpenParenthesis, ClosedParenthesis, OpenBrackets, ClosedBrackets,
     Quotations, Comma,

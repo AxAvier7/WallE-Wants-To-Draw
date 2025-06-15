@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -25,64 +26,58 @@ public class CodeExecutor : MonoBehaviour
     public void ExecuteCode()
     {
         string code = codeEditor.text;
-        ProcessCode(code);
-    }
-
-    private void ProcessCode(string code)
-    {
         var lexer = new Lexer(code);
         var tokens = lexer.Tokenize(code);
-        if (lexer.LexerErrors.Count > 0)
+        foreach (var token in tokens)
         {
-            foreach (var error in lexer.LexerErrors)
+            Debug.Log($"Token: {token.Type} - Value: {token.Value} at Line: {token.Line}, Column: {token.Column}");
+        }
+        
+        var parser = new Parser();
+        List<ASTNode> ast = parser.Parse(tokens);
+        
+        if (parser.errors.Count > 0)
+        {
+            foreach (var error in parser.errors)
             {
-                Debug.LogError($"Lexical Error: {error}");
+                Debug.LogError($"Syntax error at line {error.Line}: {error.Message}");
             }
             return;
         }
-        // foreach (var token in tokens)
-        // {
-        //     Debug.Log($"Token: {token.Type} - {token.Value} at {token.Line}:{token.Column}");
-        // }
-
-        var parser = new Parser();
-        List<ASTNode> nodes = parser.Parse(tokens);
-
-        ExecuteCommands(nodes);
+        
+        ExecuteAST(ast);
     }
 
-    private void ExecuteCommands(List<ASTNode> nodes)
+    private void ExecuteAST(List<ASTNode> nodes)
     {
         var context = new Context(new Wall_E(), gridManager, new VariableManager());
         for (int i = 0; i < nodes.Count; i++)
         {
             if (nodes[i] is LabelNode labelNode)
             {
-                if (context.Labels.ContainsKey(labelNode.LabelName))
-                {
-                    context.SetError(i, $"The label already exists: {labelNode.LabelName}");
-                    return;
-                }
-                context.Labels.Add(labelNode.LabelName, i);
+                context.RegisterLabel(labelNode.LabelName, i);
             }
         }
+
         context.Counter = 0;
         while (context.Counter < nodes.Count && !context.HasError())
         {
+            var node = nodes[context.Counter];
+
+            if (node is LabelNode)
+            {
+                context.Counter++;
+                continue;
+            }
+
             try
             {
-                nodes[context.Counter].Execute(context);
+                node.Execute(context);
                 context.Counter++;
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 context.SetError(context.Counter, ex.Message);
-                Debug.LogError($"Execution Error at line {context.Counter + 1}: {ex.Message}");
-                return;
-            }
-            if (context.HasError())
-            {
-                Debug.LogError($"Error en línea {context.ErrorLine}: {context.ErrorMessage}");
             }
         }
     }
