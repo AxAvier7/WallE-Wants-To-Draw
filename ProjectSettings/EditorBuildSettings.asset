@@ -12,9 +12,6 @@ EditorBuildSettings:
     path: Assets/Scenes/CodeDrawer.unity
     guid: 1a53fc672c3b37a42bda0b8648c48fdb
   - enabled: 1
-    path: Assets/Scenes/FreeDrawer.unity
-    guid: 386c33aed51dc32429fceed80d3c6133
-  - enabled: 1
     path: Assets/Scenes/Settings.unity
-    guid: 1a474c79883dc1d4d9c2bcc68089331a
+    guid: 51a532e7fddf39d479b8da75dcb3d993
   m_configObjects: {}

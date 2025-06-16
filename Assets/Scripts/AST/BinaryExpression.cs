@@ -41,7 +41,10 @@ public class ArithmeticBinaryExpressionNode : BinaryExpression
             case TokenType.Multiplication:
                 return leftValue * rightValue;
             case TokenType.Division:
-                return leftValue / rightValue;
+                if(rightValue!=0)
+                    return leftValue / rightValue;
+                Debug.LogError($"Division by zero at line {Line}, column {Column}");
+                break;
             case TokenType.Pow:
                 return (int)Mathf.Pow(leftValue, rightValue);
             case TokenType.Module:

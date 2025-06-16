@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 public class Lexer
@@ -110,7 +111,7 @@ public class Lexer
 
     private bool EsID(string value)
     {
-        var idRegex = new Regex(@"^[a-zA-Z][a-zA-Z0-9\-]*$");
+        var idRegex = new Regex(@"^[a-zA-Z][a-zA-Z0-9_\-]*$");
         return idRegex.IsMatch(value);
     }
 
@@ -157,12 +158,7 @@ public class Lexer
             "and", "or", "true", "false"
         };
 
-        foreach (string word in reservedWords)
-        {
-            if (value == word)
-                return true;
-        }
-        return false;
+        return reservedWords.Contains(value);
     }
 
     private void AdvancePosition()

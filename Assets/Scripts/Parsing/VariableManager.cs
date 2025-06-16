@@ -25,7 +25,7 @@ public class VariableManager : MonoBehaviour
         if (!char.IsLetter(firstChar) && firstChar != '_') return false;
         foreach (char c in name)
         {
-            if (!char.IsLetterOrDigit(c) && c != '_')
+            if (!char.IsLetterOrDigit(c) && c != '_' && c!= '-')
                 return false;
         }
         return true;

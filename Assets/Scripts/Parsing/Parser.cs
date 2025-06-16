@@ -79,8 +79,7 @@ public class Parser : MonoBehaviour
             TokenType.DrawCircle => ParseDrawCircle(),
             TokenType.DrawRectangle => ParseDrawRectangle(),
             TokenType.Fill => ParseFill(),
-            _ => throw new ParseException($"Unexpected command: {currentToken.Type}",
-                   currentToken.Line, currentToken.Column)
+            _ => throw new ParseException($"Unexpected command: {currentToken.Type}", currentToken.Line, currentToken.Column)
         };
     }
 
@@ -424,14 +423,6 @@ public class Parser : MonoBehaviour
         return new NegationExpressionNode(operand, negToken.Line, negToken.Column);
     }
 
-    private ExpressionNode ParseLogicalNegation()
-    {
-        Token notToken = currentToken;
-        Advance();
-        ExpressionNode operand = ParseFactor();
-        return new LogicalNegationNode(operand, notToken.Line, notToken.Column);
-    }
-
     private ExpressionNode ParseString()
     {
         string value = currentToken.Value.Trim('"');
@@ -480,7 +471,7 @@ public class Parser : MonoBehaviour
                 break;
 
             case "GetColorCount":
-                args.Add(ParseExpression());
+                args.Add(ParseString());
                 Consume(TokenType.Comma, "Expected ',' after color");
                 args.Add(ParseExpression());
                 Consume(TokenType.Comma, "Expected ',' after x1");
@@ -492,7 +483,7 @@ public class Parser : MonoBehaviour
                 break;
 
             case "IsBrushColor":
-                args.Add(ParseExpression());
+                args.Add(ParseString());
                 break;
 
             case "IsBrushSize":
@@ -500,7 +491,7 @@ public class Parser : MonoBehaviour
                 break;
 
             case "IsCanvasColor":
-                args.Add(ParseExpression());
+                args.Add(ParseString());
                 Consume(TokenType.Comma, "Expected ',' after color");
                 args.Add(ParseExpression());
                 Consume(TokenType.Comma, "Expected ',' after vertical");
@@ -512,17 +503,6 @@ public class Parser : MonoBehaviour
         return new FunctionCallNode(funcName, args, line, column);
     }
 
-    private bool IsFunctionToken(TokenType type)
-    {
-        return type == TokenType.GetActualX ||
-               type == TokenType.GetActualY ||
-               type == TokenType.GetCanvasSize ||
-               type == TokenType.GetColorCount ||
-               type == TokenType.IsBrushColor ||
-               type == TokenType.IsBrushSize ||
-               type == TokenType.IsCanvasColor;
-    }
-
     #endregion
 
     #region Assignment and Control Parsing
@@ -530,7 +510,7 @@ public class Parser : MonoBehaviour
     {
         int line = currentToken.Line;
         int column = currentToken.Column;
-        string variableName = tokens[currentPosition].Value;
+        string variableName = currentToken.Value;
         Advance();
 
         if (currentPosition < tokens.Count && tokens[currentPosition].Type == TokenType.AssignationArrow)

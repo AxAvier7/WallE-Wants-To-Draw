@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +11,7 @@ public class CodeExecutor : MonoBehaviour
     [SerializeField] private GridManager gridManager;
     [SerializeField] private InputField fileNameInput;
     [SerializeField] private Button executeButton;
+    [SerializeField] private Text errorDisplayText;
 
     private string projectPath;
 
@@ -17,7 +19,7 @@ public class CodeExecutor : MonoBehaviour
     {
         executeButton.onClick.AddListener(ExecuteCode);
         projectPath = Application.dataPath + "/SavedCodes/";
-        if(!Directory.Exists(projectPath))
+        if (!Directory.Exists(projectPath))
         {
             Directory.CreateDirectory(projectPath);
         }
@@ -25,27 +27,38 @@ public class CodeExecutor : MonoBehaviour
 
     public void ExecuteCode()
     {
+        gridManager.ClearGrid();
+
         string code = codeEditor.text;
         var lexer = new Lexer(code);
         var tokens = lexer.Tokenize(code);
-        foreach (var token in tokens)
+        // foreach (var token in tokens)
+        // {
+        //     Debug.Log($"Token: {token.Type} - Value: {token.Value} at Line: {token.Line}, Column: {token.Column}");
+        // }
+        if (lexer.LexerErrors.Count > 0)
         {
-            Debug.Log($"Token: {token.Type} - Value: {token.Value} at Line: {token.Line}, Column: {token.Column}");
-        }
-        
-        var parser = new Parser();
-        List<ASTNode> ast = parser.Parse(tokens);
-        
-        if (parser.errors.Count > 0)
-        {
-            foreach (var error in parser.errors)
-            {
-                Debug.LogError($"Syntax error at line {error.Line}: {error.Message}");
-            }
+            DisplayLexerErrors(lexer.LexerErrors);
             return;
         }
-        
-        ExecuteAST(ast);
+
+        var parser = new Parser();
+        List<ASTNode> ast = parser.Parse(tokens);
+
+        if (parser.errors.Count > 0)
+        {
+            DisplayParserErrors(parser.errors);
+            return;
+        }
+
+        try
+        {
+            ExecuteAST(ast);
+        }
+        catch (Exception ex)
+        {
+            DisplayRuntimeError(ex.Message);
+        }
     }
 
     private void ExecuteAST(List<ASTNode> nodes)
@@ -114,5 +127,32 @@ public class CodeExecutor : MonoBehaviour
             Debug.LogError($"Archivo no encontrado: {fullPath}");
         }
     }
+    
+    private void DisplayLexerErrors(List<LexErrors> errors)
+    {
+        StringBuilder errorMessage = new StringBuilder("Errores léxicos:\n");
+        foreach (var error in errors)
+        {
+            errorMessage.AppendLine($"- Línea {error.Line}: {error.Message}");
+            Debug.LogError(error.ToString());
+        }
+        errorDisplayText.text = errorMessage.ToString();
+    }
 
+    private void DisplayParserErrors(List<ParseException> errors)
+    {
+        StringBuilder errorMessage = new StringBuilder("Errores sintácticos:\n");
+        foreach (var error in errors)
+        {
+            errorMessage.AppendLine($"- Línea {error.Line}: {error.Message}");
+            Debug.LogError(error.ToString());
+        }
+        errorDisplayText.text = errorMessage.ToString();
+    }
+
+    private void DisplayRuntimeError(string message)
+    {
+        errorDisplayText.text = $"Error en ejecución:\n{message}";
+        Debug.LogError(message);
+    }
 }

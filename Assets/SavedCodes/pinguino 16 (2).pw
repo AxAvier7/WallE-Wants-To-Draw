@@ -1,0 +1,66 @@
+Spawn(0,0)
+Color("Black")
+n <- 11
+r <- 7
+
+GoTo [loop2] (n == 11)
+
+loop7
+Color("White")
+u <- 4
+Spawn(u,u)
+DrawLine(1,1,1)
+Spawn(u + 6, u)
+DrawLine(1,1,1)
+Spawn(u, u + 6)
+DrawLine(1,1,1)
+Spawn(u+6, u+6)
+DrawLine(1,1,1)
+
+GoTo [finalloop] (true)
+
+loop1
+Color("Orange")
+GoTo [loop3] (8 > 4)
+
+loop2
+DrawRectangle(1, 1, 7, 7, 7)
+GoTo [loop1] (true)
+
+loop3
+v <- 4
+k <- 0
+
+loop4
+v <- v + 2
+k <- k + 1
+p <- 10
+Spawn(v, p)
+DrawLine(0,0,3)
+
+GoTo [loop4] (k == 1)
+
+Spawn(r, r)
+DrawLine(0,0,1)
+GoTo [loop5] (7 > 5)
+
+loop6
+o <- 6
+Spawn(o, 6)
+DrawLine(0,0,1)
+Spawn(o + 2, 6)
+DrawLine(0,0,1)
+GoTo [loop7] (8 == 8)
+
+loop5
+Color("Black")
+Spawn(3, 8)
+DrawLine(0,0,1)
+Color("Transparent")
+DrawLine(1,0,8)
+Color("Black")
+DrawLine(0,0,1)
+GoTo [loop6] (r == 7)
+
+finalloop
+
