@@ -9,3 +9,6 @@ Este proyecto sigue las directrices que se nos indicaron pero presenta los sigui
 
 Además recomiendo no introducir tamaños de GridLayoutGroup superiores a 100x100 ya que se merma mucho el rendimiento del proyecto(100x100 genera 10000 objetos en escena).
 Las escenas tienen botones y objetos con texto para facilitar el uso del intérprete.
+
+Enlace a un zip con el ejecutable en MEGA Upload por si el que esté leyendome no tiene el Editor de Unity: https://mega.nz/file/9NZHhJIZ
+Clave de descifrado: O33BrutfTjw9AQcPfGKCdLj6jlGyeQdUeXCPTSV-3Bc
