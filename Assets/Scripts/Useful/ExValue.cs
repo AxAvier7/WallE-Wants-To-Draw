@@ -1,3 +1,4 @@
+//Clase que representa un valor en el lenguaje durante la ejecucion, puede ser un número, booleano o string
 public class ExValue
 {
     public ValueType Type { get; }
@@ -31,6 +32,7 @@ public class ExValue
     public bool AsBool() => Type == ValueType.Boolean ? _boolValue : (_intValue != 0);
     public string AsString() => Type == ValueType.String ? _stringValue : throw new System.InvalidCastException("ExValue is not a string");
 
+    //Estas conversiones implicitas permiten que ExValue se convierta automáticamente al tipo de valor esperado
     public static implicit operator ExValue(int value) => new ExValue(value);
     public static implicit operator ExValue(bool value) => new ExValue(value);
     public static implicit operator ExValue(string value) => new ExValue(value);

@@ -1,13 +1,9 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Command : StatementNode // Clase base para todos los comandos que Wall-E puede ejecutar
-{
-    public override void Accept(IVisitor visitor) => visitor.Visit(this);
+public abstract class Command : StatementNode{} // Clase base para todos los comandos que Wall-E puede ejecutar
 
-}
-
+//Comando que se encarga de la asignacion de valores a variables
 public class AssignmentCommand : Command
 {
     private string variableName;
@@ -27,13 +23,14 @@ public class AssignmentCommand : Command
     }
 }
 
+//Nodo para interpretar expresiones
 public class ExpressionStatement : Command
 {
     private ExpressionNode expression;
 
     public ExpressionStatement(ExpressionNode expression, int line, int column)
     {
-        this.expression = expression;       
+        this.expression = expression;
         Line = line;
         Column = column;
     }
@@ -44,6 +41,7 @@ public class ExpressionStatement : Command
     }
 }
 
+//Nodo para ejecutar los GoTo si se cumple su condicion
 public class GoToNode : Command
 {
     public string Label { get; }
@@ -64,10 +62,7 @@ public class GoToNode : Command
             context.ExecuteGoTo(Label);
         }
     }
-
-    public override void Accept(IVisitor visitor) => visitor.Visit(this);
 }
-
 
 public class Spawn : Command //Posiciona al Wall-E en las coordenadas (x, y) del grid
 {
@@ -170,7 +165,7 @@ public class DrawLine : Command //Dibuja una linea desde la posicion de WallE y 
     }
 }
 
-public class DrawCircle : Command  //Dibuja un circulo con centro en la posicion de WallE y con radio "radius"
+public class DrawCircle : Command  //Dibuja un circulo con centro en la posicion de WallE desplazada en la direccion indicada a una distancia "radius" y con radio "radius"
 {
     ExpressionNode dirX, dirY, radius;
     public DrawCircle(ExpressionNode dirX, ExpressionNode dirY, ExpressionNode radius, int line, int column)

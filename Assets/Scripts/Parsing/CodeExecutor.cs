@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Clase que ejecuta el codigo al pulsar un boton en la IU
 public class CodeExecutor : MonoBehaviour
 {
     [SerializeField] private InputField codeEditor;
@@ -25,11 +26,14 @@ public class CodeExecutor : MonoBehaviour
         }
     }
 
+    //Metodo que controla todo el proceso de ejecución del código introducido en el InputField
     public void ExecuteCode()
     {
         gridManager.ClearGrid();
 
         string code = codeEditor.text;
+
+        //El lexer procesa el texto para devolver los tokens
         var lexer = new Lexer(code);
         var tokens = lexer.Tokenize(code);
         // foreach (var token in tokens)
@@ -42,6 +46,7 @@ public class CodeExecutor : MonoBehaviour
             return;
         }
 
+        //El Parser convierte los tokens en un AST
         var parser = new Parser();
         List<ASTNode> ast = parser.Parse(tokens);
 
@@ -51,6 +56,7 @@ public class CodeExecutor : MonoBehaviour
             return;
         }
 
+        //Se intenta ejecutar el AST generado por el Parser
         try
         {
             ExecuteAST(ast);
@@ -61,28 +67,34 @@ public class CodeExecutor : MonoBehaviour
         }
     }
 
+    //Metodo que ejecuta todos los nodos del AST generado por el Parser
     private void ExecuteAST(List<ASTNode> nodes)
     {
         var context = new Context(new Wall_E(), gridManager, new VariableManager());
         for (int i = 0; i < nodes.Count; i++)
         {
+            //si alguno de los nodos es una etiqueta se registra en el contexto
             if (nodes[i] is LabelNode labelNode)
             {
                 context.RegisterLabel(labelNode.LabelName, i);
             }
         }
 
+        //Counter sirve para saber que nodo se va a ejecutar
         context.Counter = 0;
+
         while (context.Counter < nodes.Count && !context.HasError())
         {
             var node = nodes[context.Counter];
 
+            //Si el nodo es una etiqueta se ignora
             if (node is LabelNode)
             {
                 context.Counter++;
                 continue;
             }
 
+            //Intenta ejecutar el nodo y si no puede lanza una excepcion de ejecucion
             try
             {
                 node.Execute(context);
@@ -95,6 +107,7 @@ public class CodeExecutor : MonoBehaviour
         }
     }
 
+    //Metodo que guarda un archivo .pw con el codigo introducido
     public void SaveCode()
     {
         string fileName = fileNameInput.text;
@@ -108,6 +121,7 @@ public class CodeExecutor : MonoBehaviour
         Debug.Log($"Archivo guardado en: {fullPath}");
     }
 
+    //Carga los codigos con formato .pw
     public void LoadCode()
     {
         string fileName = fileNameInput.text;
@@ -127,7 +141,8 @@ public class CodeExecutor : MonoBehaviour
             Debug.LogError($"Archivo no encontrado: {fullPath}");
         }
     }
-    
+
+    //Metodo que muestra los errores léxicos en la IU
     private void DisplayLexerErrors(List<LexErrors> errors)
     {
         StringBuilder errorMessage = new StringBuilder("Errores léxicos:\n");
@@ -139,6 +154,7 @@ public class CodeExecutor : MonoBehaviour
         errorDisplayText.text = errorMessage.ToString();
     }
 
+    //Similar al metodo anterior pero con errores del Parser
     private void DisplayParserErrors(List<ParseException> errors)
     {
         StringBuilder errorMessage = new StringBuilder("Errores sintácticos:\n");
@@ -150,6 +166,7 @@ public class CodeExecutor : MonoBehaviour
         errorDisplayText.text = errorMessage.ToString();
     }
 
+    //Metodo que recibe cualquier excepcion que se lance al ejecutar el AST
     private void DisplayRuntimeError(string message)
     {
         errorDisplayText.text = $"Error en ejecución:\n{message}";

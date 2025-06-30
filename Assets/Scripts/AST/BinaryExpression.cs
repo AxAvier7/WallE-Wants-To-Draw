@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
+//Clase general para las nodos que representan operaciones binarias
 public abstract class BinaryExpression : ExpressionNode
 {
     public ExpressionNode Left { get; }
@@ -15,10 +16,9 @@ public abstract class BinaryExpression : ExpressionNode
         Line = line;
         Column = column;
     }
-
-    public override void Accept(IVisitor visitor) => visitor.Visit(this);
 }
 
+//Clase especifica para los nodos que representan operaciones aritmeticas
 public class ArithmeticBinaryExpressionNode : BinaryExpression
 {
     public ArithmeticBinaryExpressionNode(ExpressionNode left, ExpressionNode right, TokenType operador, int line, int column)
@@ -41,7 +41,7 @@ public class ArithmeticBinaryExpressionNode : BinaryExpression
             case TokenType.Multiplication:
                 return leftValue * rightValue;
             case TokenType.Division:
-                if(rightValue!=0)
+                if (rightValue != 0)
                     return leftValue / rightValue;
                 Debug.LogError($"Division by zero at line {Line}, column {Column}");
                 break;
@@ -75,6 +75,7 @@ public class ArithmeticBinaryExpressionNode : BinaryExpression
     }
 }
 
+//Clase especifica para los nodos que representan las operaciones binarias booleanas
 public class BooleanBinaryExpressionNode : BinaryExpression
 {
     public BooleanBinaryExpressionNode(ExpressionNode left, ExpressionNode right, TokenType operador, int line, int column)

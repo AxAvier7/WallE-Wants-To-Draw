@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+// Clase que representa a los pixeles que se ubican en el grid
 public class Pixel : MonoBehaviour
 {
     public int X { get; private set; }
     public int Y { get; private set; }
     private Image image;
-    private AspectRatioFitter aspectRatioFitter;
+    private AspectRatioFitter aspectRatioFitter; //componente que ajusta la proporcion del pixel para que este sea cuadrado
 
     void Awake()
     {

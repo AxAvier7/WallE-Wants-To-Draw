@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//Clase que gestiona las variables que se creen y sus valores.
 public class VariableManager : MonoBehaviour
 {
     private Dictionary<string, ExValue> variables = new Dictionary<string, ExValue>();
@@ -14,8 +15,6 @@ public class VariableManager : MonoBehaviour
 
     public ExValue GetVariable(string name) => variables.TryGetValue(name, out ExValue value) ? value : new ExValue(0);
 
-    public bool VariableExists(string name) => variables.ContainsKey(name);
-
     private bool IsValidVariableName(string name)
     {
         if (string.IsNullOrEmpty(name)) return false;
@@ -25,14 +24,9 @@ public class VariableManager : MonoBehaviour
         if (!char.IsLetter(firstChar) && firstChar != '_') return false;
         foreach (char c in name)
         {
-            if (!char.IsLetterOrDigit(c) && c != '_' && c!= '-')
+            if (!char.IsLetterOrDigit(c) && c != '_' && c != '-')
                 return false;
         }
         return true;
-    }
-
-    public void Clear()
-    {
-        variables.Clear();
     }
 }

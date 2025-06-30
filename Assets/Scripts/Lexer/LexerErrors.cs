@@ -1,3 +1,4 @@
+//Clase que representa los errores del lexer
 public class LexErrors
 {
     public LexErrors(string message, int line, int column)
@@ -7,9 +8,9 @@ public class LexErrors
         Column = column;
     }
 
-    public string Message{get;}
-    public int Line{get;}
-    public int Column{get;}
-    
+    public string Message { get; }
+    public int Line { get; }
+    public int Column { get; }
+
     public override string ToString() => $"Error: {Message} en ({Line}, {Column})";
 }

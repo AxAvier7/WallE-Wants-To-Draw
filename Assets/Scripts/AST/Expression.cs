@@ -1,34 +1,11 @@
 using UnityEngine;
 
+//Clase base para todas las expresiones que se pueden evaluar
 public abstract class Expression
 {
     public virtual ExValue Evaluate(Context context)
     {
         return default;
-    }
-}
-
-public class GetActualX : Expression // Devuelve la coordenada x actual de WallE
-{
-    public override ExValue Evaluate(Context context)
-    {
-        return context.WallE.GetActualX();
-    }
-}
-
-public class GetActualY : Expression // Devuelve la coordenada x actual de WallE
-{
-    public override ExValue Evaluate(Context context)
-    {
-        return context.WallE.GetActualY();
-    }
-}
-
-public class GetCanvasSize : Expression // Devuelve el ancho/largo delcanvas
-{
-    public override ExValue Evaluate(Context context)
-    {
-        return context.GridManager.Width;
     }
 }
 
@@ -48,10 +25,11 @@ public class GetColorCount : Expression // Devuelve la cantidad de casillas que 
     public override ExValue Evaluate(Context context)
     {
         int minX = Mathf.Min(x1, x2);
-        int maxX = Mathf.Min(x1, x2);
+        int maxX = Mathf.Max(x1, x2);
         int minY = Mathf.Min(y1, y2);
-        int maxY = Mathf.Min(y1, y2);
+        int maxY = Mathf.Max(y1, y2);
 
+        //Mathf.Clamp devuelve minimo si el valor es menor que el minimo, y maximo si es mayor que el maximo. Si esta entre ambos devuelve el valor
         minX = Mathf.Clamp(minX, 0, context.GridManager.Width - 1);
         maxX = Mathf.Clamp(maxX, 0, context.GridManager.Width - 1);
         minY = Mathf.Clamp(minY, 0, context.GridManager.Height - 1);

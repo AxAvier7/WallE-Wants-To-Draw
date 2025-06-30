@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+//Clase para modificar el tamaño del gridLayoutGroup
 public class GridResizer : MonoBehaviour
 {
     private GridLayoutGroup gridLayout;
@@ -27,16 +28,17 @@ public class GridResizer : MonoBehaviour
     private void InitializeComponents()
     {
         if (isInitialized) return;
-        
+
         gridLayout = GetComponent<GridLayoutGroup>();
         rectTransform = GetComponent<RectTransform>();
-        
+
         if (gridLayout == null || rectTransform == null)
             return;
-        
+
         isInitialized = true;
     }
 
+    //Metodo para redimensionar el gridLayoutGroup y calcular el tamaño de los pixeles según el ancho y alto del grid
     public void ResizeGrid()
     {
         InitializeComponents();

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+//Clase para gestionar el grid de píxeles
 public class GridManager : MonoBehaviour
 {
     [SerializeField] private GridLayoutGroup gridLayout;
@@ -18,6 +19,7 @@ public class GridManager : MonoBehaviour
         GetComponent<GridResizer>().ResizeGrid();
     }
 
+    //metodo para inicializar el grid con color blanco y un tamaño especifico
     private void InitializeGrid(int newWidth, int newHeight)
     {
         foreach (Transform child in gridLayout.transform)
@@ -30,7 +32,7 @@ public class GridManager : MonoBehaviour
         colorNames = new string[Width, Height];
 
         for (int y = 0; y < Height; y++)
-        {        
+        {
             for (int x = 0; x < Width; x++)
             {
                 GameObject pixelObj = Instantiate(pixelPrefab, gridLayout.transform);
@@ -40,15 +42,10 @@ public class GridManager : MonoBehaviour
                 pixels[x, y] = pixel;
                 colorNames[x, y] = "White";
             }
-        }    
-}
-
-    public void SetPixelColor(int x, int y, UnityEngine.Color color)
-    {
-        if (x >= 0 && x < Width && y >= 0 && y < Height)
-            pixels[x, y].SetColor(color);
+        }
     }
 
+    //Metodo que pinta un pixel en una posicion especifica con un color especifico
     public void SetPixelColor(int x, int y, string colorName)
     {
         if (x >= 0 && x < Width && y >= 0 && y < Height)
@@ -59,6 +56,7 @@ public class GridManager : MonoBehaviour
         }
     }
 
+    //Metodo que devuelve el color de un pixel en una posicion especifica
     public string GetPixelColorName(int x, int y)
     {
         if (x >= 0 && x < Width && y >= 0 && y < Height)
@@ -68,6 +66,7 @@ public class GridManager : MonoBehaviour
         return "";
     }
 
+    //Metodo que modifica el tamaño del grid cuando se pulsa el boton de resize
     public void OnResizeClicked()
     {
         int newWidth = int.Parse(widthInput.text);
@@ -79,6 +78,7 @@ public class GridManager : MonoBehaviour
         GetComponent<GridResizer>().ResizeGrid();
     }
 
+    //Metodo que limpia el grid, poniendo todos los pixeles a color blanco
     public void ClearGrid()
     {
         for (int y = 0; y < Height; y++)

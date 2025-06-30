@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 
+//Clase que representa los tokens que reconocera el lexer
 public class Token
 {
     public Token(TokenType type, string value, int line, int column)
@@ -10,13 +11,14 @@ public class Token
         Column = column;
     }
 
-    public TokenType Type{get;}
-    public string Value{get;}
-    public int Line{get;}
-    public int Column{get;}
+    public TokenType Type { get; }
+    public string Value { get; }
+    public int Line { get; }
+    public int Column { get; }
 
     public override string ToString() => $"Tipo de token: \"{Type}\" | Valor: \"{Value}\" | Linea {Line} | Columna {Column}";
 
+    //Diccionario que asocia a los tokens con sus representaciones en string
     public static Dictionary<string, TokenType> Tokens = new Dictionary<string, TokenType>(){
         {"Spawn", TokenType.Spawn},
         {"Color", TokenType.Color},
@@ -44,14 +46,14 @@ public class Token
         {"||", TokenType.Or},
         {"==", TokenType.Equals},
         {"!=", TokenType.Different},
-        {"!", TokenType.Negation}, 
+        {"!", TokenType.Negation},
         { ">=", TokenType.MajorEqual},
         {"<=", TokenType.MinorEqual},
         {">", TokenType.Major},
         {"<", TokenType.Minor},
         {"true", TokenType._true},
         {"false", TokenType._false},
-    
+
         { "(", TokenType.OpenParenthesis},
         {")", TokenType.ClosedParenthesis},
         {"[", TokenType.OpenBrackets},
@@ -77,7 +79,9 @@ public class Token
     };
 }
 
-public enum TokenType{
+//enumerable con todos los tipos de tokens
+public enum TokenType
+{
     EOF, EOL,
 
     Spawn, Color, Size, DrawLine,

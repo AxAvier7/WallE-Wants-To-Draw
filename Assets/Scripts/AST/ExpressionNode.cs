@@ -1,11 +1,14 @@
 using System.Collections.Generic;
+using UnityEngine;
 
+//Nodo general para las expresiones
 public abstract class ExpressionNode : ASTNode
 {
     public abstract ExValue Evaluate(Context context);
     public override void Execute(Context context) => Evaluate(context);
 }
 
+//Node que representa los numeros
 public class NumberNode : ExpressionNode
 {
     public int Value;
@@ -16,14 +19,13 @@ public class NumberNode : ExpressionNode
         Column = column;
     }
 
-    public override void Accept(IVisitor visitor) => visitor.Visit(this);
-
     public override ExValue Evaluate(Context context)
     {
         return Value;
     }
 }
 
+//Nodo que representa los strings
 public class StringNode : ExpressionNode
 {
     public string Value;
@@ -34,14 +36,13 @@ public class StringNode : ExpressionNode
         Column = column;
     }
 
-    public override void Accept(IVisitor visitor) => visitor.Visit(this);
-
     public override ExValue Evaluate(Context context)
     {
         return Value;
     }
 }
 
+//Nodo que representa los valores booleanos
 public class BooleanNode : ExpressionNode
 {
     public bool Value;
@@ -52,14 +53,13 @@ public class BooleanNode : ExpressionNode
         Column = column;
     }
 
-    public override void Accept(IVisitor visitor) => visitor.Visit(this);
-
     public override ExValue Evaluate(Context context)
     {
         return Value;
     }
 }
 
+//Nodo que representa las funciones definidas en el lenguaje
 public class FunctionCallNode : ExpressionNode
 {
     public string FunctionName { get; }
@@ -71,7 +71,6 @@ public class FunctionCallNode : ExpressionNode
         Line = line;
         Column = column;
     }
-    public override void Accept(IVisitor visitor) => visitor.Visit(this);
 
     public override ExValue Evaluate(Context context)
     {
@@ -123,6 +122,7 @@ public class FunctionCallNode : ExpressionNode
     }
 }
 
+//Nodo que representa las variables
 public class VariableNode : ExpressionNode
 {
     public string Name { get; }
@@ -132,7 +132,6 @@ public class VariableNode : ExpressionNode
         Line = line;
         Column = column;
     }
-    public override void Accept(IVisitor visitor) => visitor.Visit(this);
 
     public override ExValue Evaluate(Context context)
     {
@@ -140,10 +139,11 @@ public class VariableNode : ExpressionNode
     }
 }
 
-public class NegationExpressionNode : ExpressionNode
+//Nodo que maneja los numeros negativos
+public class NegativeNumberNode : ExpressionNode
 {
     public ExpressionNode Operand { get; }
-    public NegationExpressionNode(ExpressionNode operand, int line, int column)
+    public NegativeNumberNode(ExpressionNode operand, int line, int column)
     {
         Operand = operand;
         Line = line;
@@ -151,16 +151,11 @@ public class NegationExpressionNode : ExpressionNode
     }
     public override ExValue Evaluate(Context context)
     {
-        int operandValue = Operand.Evaluate(context).AsInt();
-        return operandValue == 0 ? 1 : 0;
-    }
-
-    public override void Accept(IVisitor visitor)
-    {
-        visitor.Visit(this);
+        return -Operand.Evaluate(context).AsInt();
     }
 }
 
+//Nodo que representa expresiones entre parentesis
 public class ParenthesizedExpressionNode : ExpressionNode
 {
     public ExpressionNode Expression { get; }
@@ -175,13 +170,9 @@ public class ParenthesizedExpressionNode : ExpressionNode
     {
         return Expression.Evaluate(context);
     }
-
-    public override void Accept(IVisitor visitor)
-    {
-        visitor.Visit(this);
-    }
 }
 
+//Nodo que maneja la negacion booleana
 public class LogicalNegationNode : ExpressionNode
 {
     public ExpressionNode Operand { get; }
@@ -196,10 +187,5 @@ public class LogicalNegationNode : ExpressionNode
     {
         bool operandValue = Operand.Evaluate(context).AsBool();
         return !operandValue;
-    }
-
-    public override void Accept(IVisitor visitor)
-    {
-        visitor.Visit(this);
     }
 }

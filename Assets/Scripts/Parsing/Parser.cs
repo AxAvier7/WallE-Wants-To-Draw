@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+//Esta es la clase que se encarga de convertir los tokens generados por el lexer en un AST
 public class Parser : MonoBehaviour
 {
     private List<Token> tokens;
@@ -11,6 +12,7 @@ public class Parser : MonoBehaviour
     private int currentColumn;
     public List<ParseException> errors = new List<ParseException>();
 
+    //Metodo que recibe todos los tokens y devuelve una lista de nodos
     public List<ASTNode> Parse(List<Token> tokens)
     {
         this.tokens = tokens;
@@ -28,34 +30,34 @@ public class Parser : MonoBehaviour
 
         List<ASTNode> nodes = new List<ASTNode>();
 
+        //Iteramos sobre los tokens y creamos nodos segun el token que se analice
         while (currentPosition < tokens.Count && currentToken != null)
         {
-            try
+            try //Intenta parsear el token actual
             {
                 if (currentToken == null) break;
-                if (currentToken.Type == TokenType.Label)
+                if (currentToken.Type == TokenType.Label) //Si es una etiqueta
                 {
                     nodes.Add(ParseLabel());
                 }
-                else if (IsCommandToken(currentToken.Type))
+                else if (IsCommandToken(currentToken.Type)) //Si es un comando
                 {
                     nodes.Add(ParseCommand());
                 }
-                else if (currentToken.Type == TokenType.Variable)
+                else if (currentToken.Type == TokenType.Variable) //Si es una variable
                 {
                     nodes.Add(ParseAssignmentOrExpression());
                 }
-                else if (currentToken.Type == TokenType.GoTo)
+                else if (currentToken.Type == TokenType.GoTo) //Si es un GoTo
                 {
                     nodes.Add(ParseGoTo());
                 }
-
                 else
                 {
-                    nodes.Add(ParseExpressionStatement());
+                    nodes.Add(ParseExpressionStatement()); //Si es cualquier otra expresion
                 }
             }
-            catch (ParseException ex)
+            catch (ParseException ex) //Si no puede parsear el token actual, lanza una excepcion
             {
                 errors.Add(ex);
                 SkipToNextLine();
@@ -68,8 +70,10 @@ public class Parser : MonoBehaviour
         return nodes;
     }
 
+    //Metodo que parsea los comandos
     private Command ParseCommand()
     {
+        //Hacemos un switch para parsear el comando segun su tipo
         return currentToken.Type switch
         {
             TokenType.Spawn => ParseSpawn(),
@@ -84,6 +88,7 @@ public class Parser : MonoBehaviour
     }
 
     #region CommandParsing
+    //Metodo que parsea el comando Spawn
     private Command ParseSpawn()
     {
         int line = currentToken.Line;
@@ -98,6 +103,7 @@ public class Parser : MonoBehaviour
         return new Spawn(x, y, line, column);
     }
 
+    //Metodo que parsea el comando Color
     private Command ParseColor()
     {
         int line = currentToken.Line;
@@ -106,76 +112,20 @@ public class Parser : MonoBehaviour
         Advance();
         Consume(TokenType.OpenParenthesis, "Expected '(' after 'Color'");
         string color;
-        switch (tokens[currentPosition].Type)
+        if (ColorManager.ColorTokenToString.TryGetValue(tokens[currentPosition].Type, out color))
         {
-            case TokenType.Red:
-                color = "Red";
-                Advance();
-                break;
-            case TokenType.Blue:
-                color = "Blue";
-                Advance();
-                break;
-            case TokenType.Green:
-                color = "Green";
-                Advance();
-                break;
-            case TokenType.Yellow:
-                color = "Yellow";
-                Advance();
-                break;
-            case TokenType.Orange:
-                color = "Orange";
-                Advance();
-                break;
-            case TokenType.Purple:
-                color = "Purple";
-                Advance();
-                break;
-            case TokenType.Black:
-                color = "Black";
-                Advance();
-                break;
-            case TokenType.White:
-                color = "White";
-                Advance();
-                break;
-            case TokenType.Gray:
-                color = "Gray";
-                Advance();
-                break;
-            case TokenType.Pink:
-                color = "Pink";
-                Advance();
-                break;
-            case TokenType.LightBlue:
-                color = "LightBlue";
-                Advance();
-                break;
-            case TokenType.LightGreen:
-                color = "LightGreen";
-                Advance();
-                break;
-            case TokenType.Brown:
-                color = "Brown";
-                Advance();
-                break;
-            case TokenType.LightGray:
-                color = "LightGray";
-                Advance();
-                break;
-            case TokenType.Transparent:
-                color = "Transparent";
-                Advance();
-                break;
-            default:
-                throw new Exception($"Expected a color token, found: {tokens[currentPosition]}");
+            Advance();
+        }
+        else
+        {
+            throw new Exception($"Expected a color token, found: {tokens[currentPosition]}");
         }
 
         Consume(TokenType.ClosedParenthesis, "Expected ')' after color string");
         return new Color(color, line, column);
     }
 
+    //Metodo que parsea el comando Size
     private Command ParseSize()
     {
         int line = currentToken.Line;
@@ -188,6 +138,7 @@ public class Parser : MonoBehaviour
         return new Size(size, line, column);
     }
 
+    //Metodo que parsea el comando DrawLine
     private Command ParseDrawLine()
     {
         int line = currentToken.Line;
@@ -204,6 +155,7 @@ public class Parser : MonoBehaviour
         return new DrawLine(dirX, dirY, distance, line, column);
     }
 
+    //Metodo que parsea el comando DrawCircle
     private Command ParseDrawCircle()
     {
         int line = currentToken.Line;
@@ -220,6 +172,7 @@ public class Parser : MonoBehaviour
         return new DrawCircle(dirX, dirY, radius, line, column);
     }
 
+    //Metodo que parsea el comando DrawRectangle
     private Command ParseDrawRectangle()
     {
         int line = currentToken.Line;
@@ -241,6 +194,7 @@ public class Parser : MonoBehaviour
         return new DrawRectangle(dirX, dirY, distance, width, height, line, column);
     }
 
+    //Metodo que parsea el comando Fill
     private Command ParseFill()
     {
         int line = currentToken.Line;
@@ -255,17 +209,20 @@ public class Parser : MonoBehaviour
     #endregion
 
     #region Expression Parsing
+    //Metodo que parsea cualquier expresion
     private Command ParseExpressionStatement()
     {
         ExpressionNode expr = ParseExpression();
         return new ExpressionStatement(expr, currentToken.Line, currentToken.Column);
     }
 
+    //Metodo alias para ParseBooleanExpression
     private ExpressionNode ParseExpression()
     {
         return ParseBooleanExpression();
     }
 
+    //Metodo que parsea las expresiones aritmeticas
     private ExpressionNode ParseArithmeticExpression()
     {
         ExpressionNode left = ParseTerm();
@@ -279,6 +236,7 @@ public class Parser : MonoBehaviour
         return left;
     }
 
+    //Metodo que parsea los terminos de las expresiones aritmeticas
     private ExpressionNode ParseTerm()
     {
         ExpressionNode left = ParseFactor();
@@ -294,6 +252,7 @@ public class Parser : MonoBehaviour
         return left;
     }
 
+    //Metodo que parsea los factores de las expresiones aritmeticas
     private ExpressionNode ParseFactor()
     {
         if (currentToken == null)
@@ -301,6 +260,7 @@ public class Parser : MonoBehaviour
 
         Debug.Log($"ParseFactor: {currentToken?.Type} '{currentToken?.Value}'");
 
+        //Switch para parsear el tipo de token actual
         switch (currentToken.Type)
         {
             case TokenType.Number:
@@ -312,8 +272,11 @@ public class Parser : MonoBehaviour
             case TokenType.OpenParenthesis:
                 return ParseParenthesizedExpression();
 
-            case TokenType.Substraction:
+            case TokenType.Negation:
                 return ParseNegation();
+
+            case TokenType.Substraction:
+                return ParseNegativeNumber();
 
             case TokenType._true:
             case TokenType._false:
@@ -338,6 +301,7 @@ public class Parser : MonoBehaviour
     #endregion
 
     #region Boolean and Comparison Parsing
+    //Metodo que parsea las expresiones booleanas, dando prioridad al OR
     private ExpressionNode ParseBooleanExpression()
     {
         ExpressionNode left = ParseAndExpression();
@@ -351,10 +315,11 @@ public class Parser : MonoBehaviour
         return left;
     }
 
+    //Metodo que parsea las expresiones booleanas AND (&&)
     private ExpressionNode ParseAndExpression()
     {
         ExpressionNode left = ParseEquality();
-        
+
         while (currentToken != null && currentToken.Type == TokenType.And)
         {
             Token op = currentToken;
@@ -363,23 +328,25 @@ public class Parser : MonoBehaviour
             left = new BooleanBinaryExpressionNode(left, right, op.Type, left.Line, left.Column);
         }
         return left;
-}
+    }
 
+    //Metodo que parsea las igualdades o desigualdades
     private ExpressionNode ParseEquality()
     {
-        ExpressionNode left = ParseRelational();
+        ExpressionNode left = ParseComparison();
 
         while (currentToken != null && (currentToken.Type == TokenType.Equals || currentToken.Type == TokenType.Different))
         {
             Token op = currentToken;
             Advance();
-            ExpressionNode right = ParseRelational();
+            ExpressionNode right = ParseComparison();
             left = new BooleanBinaryExpressionNode(left, right, op.Type, left.Line, left.Column);
         }
         return left;
     }
 
-    private ExpressionNode ParseRelational()
+    //Metodo que parsea las comparaciones (mayor, menor, mayor o igual, menor o igual)
+    private ExpressionNode ParseComparison()
     {
         ExpressionNode left = ParseArithmeticExpression();
 
@@ -396,6 +363,7 @@ public class Parser : MonoBehaviour
     #endregion
 
     #region Values Parsing
+    //Metodo que parsea los valores booleanos
     private ExpressionNode ParseBoolean()
     {
         bool value = currentToken.Type == TokenType._true;
@@ -405,6 +373,7 @@ public class Parser : MonoBehaviour
         return new BooleanNode(value, line, column);
     }
 
+    //Metodo que parsea las expresiones entre parentesis
     private ExpressionNode ParseParenthesizedExpression()
     {
         int line = currentToken.Line;
@@ -415,14 +384,28 @@ public class Parser : MonoBehaviour
         Consume(TokenType.ClosedParenthesis, "Expected ')' after expression");
         return new ParenthesizedExpressionNode(expr, line, column);
     }
+
+    //Metodo que parsea la negacion logica
     private ExpressionNode ParseNegation()
     {
         Token negToken = currentToken;
         Advance();
         ExpressionNode operand = ParseFactor();
-        return new NegationExpressionNode(operand, negToken.Line, negToken.Column);
+        return new LogicalNegationNode(operand, negToken.Line, negToken.Column);
     }
 
+    //Metodo que parsea los numeros negativos
+    private ExpressionNode ParseNegativeNumber()
+    {
+        Advance();
+        int value = -int.Parse(currentToken.Value);
+        var node = new NumberNode(value, currentToken.Line, currentToken.Column);
+
+        Advance();
+        return node;
+    }
+
+    //Metodo que parsea los strings
     private ExpressionNode ParseString()
     {
         string value = currentToken.Value.Trim('"');
@@ -432,6 +415,7 @@ public class Parser : MonoBehaviour
         return new StringNode(value, line, column);
     }
 
+    //Metodo que parsea los numeros
     private ExpressionNode ParseNumber()
     {
         int value = int.Parse(currentToken.Value);
@@ -441,6 +425,7 @@ public class Parser : MonoBehaviour
         return new NumberNode(value, line, column);
     }
 
+    //Metodo que parsea las variables
     private ExpressionNode ParseVariableNode()
     {
         string varName = currentToken.Value;
@@ -453,6 +438,7 @@ public class Parser : MonoBehaviour
     #endregion
 
     #region Function Parsing
+    //Metodo que parsea las llamadas a funciones
     private ExpressionNode ParseFunctionCall()
     {
         string funcName = currentToken.Value;
@@ -463,13 +449,16 @@ public class Parser : MonoBehaviour
         Consume(TokenType.OpenParenthesis, $"Expected '(' after '{funcName}'");
         List<ExpressionNode> args = new List<ExpressionNode>();
 
+        //Hacemos un switch para parsear los argumentos de la funcion segun su nombre
         switch (funcName)
         {
+            //Estas no reciben argumentos
             case "GetActualX":
             case "GetActualY":
             case "GetCanvasSize":
                 break;
 
+            //A partir de aqui las funciones que reciben argumentos. Dependiendo de qué argumentos reciban, se parsean de una forma u otra
             case "GetColorCount":
                 args.Add(ParseString());
                 Consume(TokenType.Comma, "Expected ',' after color");
@@ -506,6 +495,7 @@ public class Parser : MonoBehaviour
     #endregion
 
     #region Assignment and Control Parsing
+    //Metodo que parsea las asignaciones de variables o las expresiones
     private Command ParseAssignmentOrExpression()
     {
         int line = currentToken.Line;
@@ -513,6 +503,7 @@ public class Parser : MonoBehaviour
         string variableName = currentToken.Value;
         Advance();
 
+        //Si el siguiente token es <-, se parsea como asignacion
         if (currentPosition < tokens.Count && tokens[currentPosition].Type == TokenType.AssignationArrow)
         {
             Advance();
@@ -522,6 +513,7 @@ public class Parser : MonoBehaviour
         return new ExpressionStatement(new VariableNode(variableName, line, column), line, column);
     }
 
+    //Metodo que parsea los GoTo
     private Command ParseGoTo()
     {
         Advance();
@@ -535,6 +527,7 @@ public class Parser : MonoBehaviour
         return new GoToNode(label, condition, currentToken.Line, currentToken.Column);
     }
 
+    //Metodo que parsea las etiquetas
     private LabelNode ParseLabel()
     {
         string labelName = currentToken.Value;
@@ -547,6 +540,7 @@ public class Parser : MonoBehaviour
     #endregion
 
     #region Helper Methods
+    //Metodo que revisa si el token actual es el que se espera en la expresion y si no lanza un error
     private void Consume(TokenType expected, string message)
     {
         if (currentToken == null)
@@ -560,6 +554,7 @@ public class Parser : MonoBehaviour
         Advance();
     }
 
+    //Metodo que avanza en la lista de tokens, modifica linea y columna y cambia el token actual
     private void Advance()
     {
         currentPosition++;
@@ -575,6 +570,7 @@ public class Parser : MonoBehaviour
         }
     }
 
+    //Metodo para saber si lo que se evalua es un comando
     private bool IsCommandToken(TokenType type)
     {
         return type == TokenType.Spawn ||
@@ -586,6 +582,7 @@ public class Parser : MonoBehaviour
             type == TokenType.Fill;
     }
 
+    //Metodo que cambia de linea
     private void SkipToNextLine()
     {
         if (currentToken == null)
