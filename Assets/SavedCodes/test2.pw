@@ -1,0 +1,16 @@
+Spawn(14,14)
+Color("Blue")
+n <- 5
+n2 <- 0
+n1 <- 1
+
+loop
+
+aux <- n1
+n1 <- n1 + n2
+n2 <- aux
+
+DrawCircle(0,1,n1)
+n <- n - 1
+
+GoTo [loop] (n > 0)

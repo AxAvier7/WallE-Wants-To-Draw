@@ -4,7 +4,7 @@ using UnityEngine;
 //Clase que gestiona las variables que se creen y sus valores.
 public class VariableManager : MonoBehaviour
 {
-    private Dictionary<string, ExValue> variables = new Dictionary<string, ExValue>();
+    public Dictionary<string, ExValue> variables = new Dictionary<string, ExValue>();
 
     public void SetVariable(string name, ExValue value)
     {

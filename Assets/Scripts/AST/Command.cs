@@ -56,6 +56,11 @@ public class GoToNode : Command
 
     public override void Execute(Context context)
     {
+        if (!context.Labels.ContainsKey(Label))
+        {
+            Debug.LogError("no hay label");
+        }
+
         var condition = Condition.Evaluate(context);
         if (condition.AsBool())
         {

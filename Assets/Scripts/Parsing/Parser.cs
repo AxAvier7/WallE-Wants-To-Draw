@@ -508,8 +508,10 @@ public class Parser : MonoBehaviour
         {
             Advance();
             ExpressionNode expression = ParseExpression();
+            Debug.Log(variableName.ToString());
             return new AssignmentCommand(variableName, expression, line, column);
         }
+        Debug.Log(variableName.ToString());
         return new ExpressionStatement(new VariableNode(variableName, line, column), line, column);
     }
 
@@ -524,6 +526,7 @@ public class Parser : MonoBehaviour
         Consume(TokenType.OpenParenthesis, "Expected '(' after label");
         ExpressionNode condition = ParseBooleanExpression();
         Consume(TokenType.ClosedParenthesis, "Expected ')' after condition");
+        Debug.Log("Llamando Goto a " + label);
         return new GoToNode(label, condition, currentToken.Line, currentToken.Column);
     }
 
@@ -534,6 +537,7 @@ public class Parser : MonoBehaviour
         int line = currentToken.Line;
         int column = currentToken.Column;
         Advance();
+        Debug.Log("label " + labelName);
         return new LabelNode(labelName, line, column);
     }
 

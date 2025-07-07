@@ -135,6 +135,7 @@ public class VariableNode : ExpressionNode
 
     public override ExValue Evaluate(Context context)
     {
+        Debug.Log("nombre de variable: " + Name + ", valor de la variable: " + context.Variables.variables[Name].AsInt());
         return context.Variables.GetVariable(Name);
     }
 }
